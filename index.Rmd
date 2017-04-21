@@ -1,0 +1,40 @@
+---
+title: "LPC Delisting"
+author: "Michael Evans, Jacob Malcom, Ya-Wei Li, Ryan Covington"
+date: "April 5, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Methods
+
+### Data
+
+Oklahoma provides approval dates.  We selected all records approved after Sept. 01, 2015.
+Kansas provides year start.  To be conservative, we selected all records starting in 2016 and 2017.
+Colorado provides 'spud date.'  We selected all records after Sept. 01, 2015.
+
+New Mexico provides approval, effective, and spud dates.  
+
+Texas provides approved date, and completion date.
+
+The LPC RWP specifies buffer distances around specific forms of habitat disturbance.  We buffered newly constructed turbines and oil and well pads by 667m and 200m, respectively.  Private roads were buffered by 10m.
+
+http://www.kansasenergy.org/wind_projects.htm
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
