@@ -1,12 +1,23 @@
 ---
-title: "LPC Delisting"
+title: "Use of Recovery Units"
 author: "Michael Evans, Jacob Malcom, Ya-Wei Li, Ryan Covington"
-date: "April 5, 2017"
-output: html_document
+date: "December 5, 2016"
+output: word_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+data(rus)
+#n <- nrow(rus)
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(mclogit)
+library(party)
+library(plotly)
+library(pROC)
+library(stringr)
+library(tidyr)
 ```
 
 # Methods
