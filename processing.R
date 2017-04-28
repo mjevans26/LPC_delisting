@@ -38,6 +38,8 @@ ct <- ctree(Index~cv_z+rcv_z+ndvi_z+ndsi_z+mode, data = rawcd[rawcd$mode == 82,]
 
 auc <- roc(response = goddamn$group, predictor = unlist(predict(ct, newdata = goddamn, type = "prob"))[seq(1,nrow(goddamn)*2,2)])
 
+
+##LDA DOESNT PRINT INTERCEPT!!
 scrub <- lda(Index ~ cv_z + rcv_z + ndvi_z + ndsi_z, data = rawcd)
 scrub_pred <- predict(scrub, type = "prob")
 ldahist(data = scrub_pred$x[,1], g = scrub_pred$class)
