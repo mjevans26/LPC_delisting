@@ -67,8 +67,26 @@ LSchange$Class <- LSag$Class[LSag$Season == 1]
 LSchange$cv <- sum((LSag[LSag$Season == 2 & duplicated(LSag$Feat), 2:7] - LSag[LSag$Season == 1, 2:7])^2)
 for (i in LSag$Feat[LSag$Season == 2 & duplicated(LSag$Feat)]){
   LSchange$cv[LSchange$Feat == i] <- sum((LSag[LSag$Season == 2 & LSag$Feat == i,2:7] - LSag[LSag$Season == 1 & LSag$Feat == i, 2:7])^2)
+    b <- LSag[LSag$Season == 2 & LSag$Feat == i, 2:7]
+    a <- LSag[LSag$Season == 1 & LSag$Feat == i, 2:7]
+    m <- c(max(b[1],a[1]), max(b[2],a[2]), max(b[3],a[3]), max(b[4],a[4]), max(b[5],a[5]), max(b[6],a[6]))
+  LSchange$rcvmax[LSchange$Feat == i] <- sum(((b-a)/m)^2)
 }
+
+LSchange$cv_z <- (LSchange$cv - LSchange_stats$Min[LSchange_stats$Metric == "cv"])/LSchange_stats$SD[LSchange_stats$Metric == "cv"]
+LSchange$rcv_z <- (LSchange$rcvmax - LSchange_stats$Min[LSchange_stats$Metric == "rcv"])/LSchange_stats$SD[LSchange_stats$Metric == "rcv"]
+LSchange$ndvi_z <- (LSchange$ndvi - LSchange_stats$Mean[LSchange_stats$Metric == "ndvi"])/LSchange_stats$SD[LSchange_stats$Metric == "ndvi"]
+LSchange$ndsi_z <- (LSchange$ndsi - LSchange_stats$Mean[LSchange_stats$Metric == "ndsi"])/LSchange_stats$SD[LSchange_stats$Metric == "ndsi"]
+
 ##Intercept is -0.957484
+change <- lda(Class ~ cv_z + rcv_z + ndvi_z + ndsi_z, data = LSchange)
+change_pred <- predict(change, type = "prob")
+ldahist(data = change_pred$x[,1], g = change_pred$class)
+change_out <- data.frame("predict" = change_pred$class, "LD1" = change_pred$x[,1], "p0" = change_pred$posterior[,1], "p1" = change_pred$posterior[,2], "observed" = LSchange$Class)
+change_out$predict <- as.numeric(as.character(change_out$predict))
+change_roc <- roc(response = change_out$observed, predictor = change_out$LD1)
+plot_ly(data = as.data.frame(change_roc[2:4]), y = ~sensitivities, x = ~ 1 - specificities, type = "scatter", text = ~paste("Thresh:", thresholds), hoverinfo = text)
+
 
 AG_on <- lda(Class ~ cv + + ndvi + ndsi, data = LSag[LSag$Season == 2,])
 AGon_pred <- predict(AG_on, type = "prob")
@@ -77,3 +95,15 @@ AGon_out <- data.frame("predict" = AGon_pred$class, "LD1" = AGon_pred$x[,1], "p0
 AGon_out$predict <- as.numeric(as.character(AGon_out$predict))
 AGon_roc <- roc(response = AGon_out$observed, predictor = AGon_out$LD1)
 plot_ly(data = as.data.frame(AGon_roc[2:4]), y = ~sensitivities, x = ~ 1 - specificities, type = "scatter", text = ~paste("Thresh:", thresholds), hoverinfo = text)
+
+AG_off <- lda(Class ~ cv + + ndvi + ndsi, data = LSag[LSag$Season == 1,])
+AGon_pred <- predict(AG_off, type = "prob")
+ldahist(data = AGoff_pred$x[,1], g = AGoff_pred$class)
+AGoff_out <- data.frame("predict" = AGoff_pred$class, "LD1" = AGoff_pred$x[,1], "p0" = AGoff_pred$posterior[,1], "p1" = AGoff_pred$posterior[,2], "observed" = LSag[LSag$Season == 1]$Class)
+AGoff_out$predict <- as.numeric(as.character(AGoff_out$predict))
+AGoff_roc <- roc(response = AGoff_out$observed, predictor = AGoff_out$LD1)
+
+intercept <- function(input, model, prediction, i){
+  sum(input$cv_z[i]*model$scaling["cv_z",1], input$rcv_z[i]*model$scaling["rcv_z",1],
+      input$ndvi_z[i]*model$scaling["ndvi_z",1], input$ndsi_z[i]*model$scaling["ndsi_z",1]) - prediction$LD1[i]
+}
