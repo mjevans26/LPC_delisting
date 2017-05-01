@@ -54,6 +54,26 @@ ldahist(data = N_pred$x[,1], g = N_pred$class)
 N_out <- data.frame("predict" = N_pred$class, "LD1" = N_pred$x[,1], "p0" = N_pred$posterior[,1], "p1" = N_pred$posterior[,2], "observed" = rawcdN$Index)
 N_out$predict <- as.numeric(as.character(N_out$predict))
 N_roc <- roc(response = N_out$observed, predictor = N_out$LD1)
-plot_ly(data = as.data.frame(N_roc[2:4]), y = ~sensitivities, x = ~ 1 - specificities, type = "scatter", text = ~paste("Thresh:", thresholds), hoverinfo = text)
+plot_ly(data = as.data.frame(AG_roc[2:4]), y = ~sensitivities, x = ~ 1 - specificities, type = "scatter", text = ~paste("Thresh:", thresholds), hoverinfo = text)
 
 LSag <- read.csv(file = "KS_ag_raw.csv", header = TRUE)
+LSag$ID <- as.character(LSag$ID)
+LSag$Feat <- substr(LSag$ID, 3, nchar(LSag$ID))
+LSag$Feat <- as.factor(LSag$Feat)
+
+LSchange <- LSag[LSag$Season == 2 & duplicated(LSag$Feat), 9:11] - LSag[LSag$Season == 1, 9:11]
+LSchange$Feat <- LSag$Feat[LSag$Season == 1]
+LSchange$Class <- LSag$Class[LSag$Season == 1]
+LSchange$cv <- sum((LSag[LSag$Season == 2 & duplicated(LSag$Feat), 2:7] - LSag[LSag$Season == 1, 2:7])^2)
+for (i in LSag$Feat[LSag$Season == 2 & duplicated(LSag$Feat)]){
+  LSchange$cv[LSchange$Feat == i] <- sum((LSag[LSag$Season == 2 & LSag$Feat == i,2:7] - LSag[LSag$Season == 1 & LSag$Feat == i, 2:7])^2)
+}
+##Intercept is -0.957484
+
+AG_on <- lda(Class ~ cv + + ndvi + ndsi, data = LSag[LSag$Season == 2,])
+AGon_pred <- predict(AG_on, type = "prob")
+ldahist(data = AGon_pred$x[,1], g = AGon_pred$class)
+AGon_out <- data.frame("predict" = AGon_pred$class, "LD1" = AGon_pred$x[,1], "p0" = AGon_pred$posterior[,1], "p1" = AGon_pred$posterior[,2], "observed" = LSag[LSag$Season == 2]$Class)
+AGon_out$predict <- as.numeric(as.character(AGon_out$predict))
+AGon_roc <- roc(response = AGon_out$observed, predictor = AGon_out$LD1)
+plot_ly(data = as.data.frame(AGon_roc[2:4]), y = ~sensitivities, x = ~ 1 - specificities, type = "scatter", text = ~paste("Thresh:", thresholds), hoverinfo = text)
