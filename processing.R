@@ -1,3 +1,11 @@
+library(plotly)
+library(pROC)
+library(MASS)
+##Shape and Landcover data from Arc, after filtering for well detection output polygons
+## 1 > x < 15 acres, and falling in scrub or grassland.
+NWells <- read.csv("NWell_ID_thresh.csv", header = TRUE, sep = ",")
+SWells <- read.csv("SWell_ID_thresh.csv", header = TRUE, sep = ",")
+
 nwe <- read.csv("NewWellEval.csv", header = TRUE, sep = ",")
 nwe$X <- NULL
 nwe$X.1 <- NULL
@@ -46,7 +54,7 @@ ldahist(data = scrub_pred$x[,1], g = scrub_pred$class)
 scrub_out <- data.frame("predict" = scrub_pred$class, "LD1" = scrub_pred$x[,1], "p0" = scrub_pred$posterior[,1], "p1" = scrub_pred$posterior[,2], "observed" = rawcd$Index)
 scrub_out$predict <- as.numeric(as.character(scrub_out$predict))
 scrub_roc <- roc(response = scrub_out$observed, predictor = scrub_out$LD1)
-plot_ly(data = as.data.frame(scrub_roc[2:4]), y = ~sensitivities, x = ~ 1- specificities, type = "scatter", text = ~paste("Thresh:", thresholds), hoverinfo = text)
+plot_ly(data = as.data.frame(scrub_roc[2:4]), y = ~sensitivities, x = ~ specificities, type = "scatter", text = ~paste("Thresh:", thresholds), hoverinfo = text)
 
 N <- lda(Index ~ cv_z + rcv_z + ndvi_z + ndsi_z, data = rawcdN)
 N_pred <- predict(N, type = "prob")
@@ -54,7 +62,7 @@ ldahist(data = N_pred$x[,1], g = N_pred$class)
 N_out <- data.frame("predict" = N_pred$class, "LD1" = N_pred$x[,1], "p0" = N_pred$posterior[,1], "p1" = N_pred$posterior[,2], "observed" = rawcdN$Index)
 N_out$predict <- as.numeric(as.character(N_out$predict))
 N_roc <- roc(response = N_out$observed, predictor = N_out$LD1)
-plot_ly(data = as.data.frame(AG_roc[2:4]), y = ~sensitivities, x = ~ 1 - specificities, type = "scatter", text = ~paste("Thresh:", thresholds), hoverinfo = text)
+plot_ly(data = as.data.frame(N_roc[2:4]), y = ~sensitivities, x = ~ 1 - specificities, type = "scatter", text = ~paste("Thresh:", thresholds), hoverinfo = text)
 
 LSag <- read.csv(file = "KS_ag_raw.csv", header = TRUE)
 LSag$ID <- as.character(LSag$ID)
@@ -104,6 +112,7 @@ AGoff_out$predict <- as.numeric(as.character(AGoff_out$predict))
 AGoff_roc <- roc(response = AGoff_out$observed, predictor = AGoff_out$LD1)
 
 intercept <- function(input, model, prediction, i){
+  prediction$LD1[i] -
   sum(input$cv_z[i]*model$scaling["cv_z",1], input$rcv_z[i]*model$scaling["rcv_z",1],
-      input$ndvi_z[i]*model$scaling["ndvi_z",1], input$ndsi_z[i]*model$scaling["ndsi_z",1]) - prediction$LD1[i]
+      input$ndvi_z[i]*model$scaling["ndvi_z",1], input$ndsi_z[i]*model$scaling["ndsi_z",1])
 }
