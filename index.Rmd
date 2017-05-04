@@ -37,6 +37,8 @@ The LPC RWP specifies buffer distances around specific forms of habitat disturba
 
 http://www.kansasenergy.org/wind_projects.htm
 
+If suitable sentinel data was not available before the well date, we compared aerial imagery from before the well date to the suitable sentinel data after the well date.  If no change was detected...
+
 ```{r cars}
 summary(cars)
 ```
@@ -53,7 +55,9 @@ Texas reported 132 with completion date after 09/01/2015 (89 detected) * 38
 Colorado reported 1 with 'spud date' afte 09/01/2015 (1 detected)
 Oklahoma reported 19 (2 detected *) 13
 
-Of these, we detected 178 wells within 500m of reported locations.  This rate was lowest in 
+Of these, we detected 178 wells within 500m of reported locations.  This rate was lowest in
+
+These discrepancies may arise for several reasons, inaccurately reported cooridnates, inaccurate dates either signifying well construction occurred later than in reality, or delays in construction.
 
 131 + 24 additional 'pad-like' disturbances were detected at least 500m from reported pads.  This is a potential ~ 30,000 acres of mitigation.
 ## Including Plots
