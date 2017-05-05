@@ -1,6 +1,8 @@
 library(plotly)
 library(pROC)
 library(MASS)
+
+-3.33734 + ( "RATIO"*(1-"CONVEX")*-0.2876616) +(94.4642983*("Shape_Area"/(POWER("Shape_Leng",2)/4*3.14))/0.000247)< -0.4
 ##Shape and Landcover data from Arc, after filtering for well detection output polygons
 ## 1 > x < 15 acres, and falling in scrub or grassland.
 NWells <- read.csv("NWell_ID_thresh.csv", header = TRUE, sep = ",")
@@ -62,7 +64,7 @@ ldahist(data = N_pred$x[,1], g = N_pred$class)
 N_out <- data.frame("predict" = N_pred$class, "LD1" = N_pred$x[,1], "p0" = N_pred$posterior[,1], "p1" = N_pred$posterior[,2], "observed" = rawcdN$Index)
 N_out$predict <- as.numeric(as.character(N_out$predict))
 N_roc <- roc(response = N_out$observed, predictor = N_out$LD1)
-plot_ly(data = as.data.frame(N_roc[2:4]), y = ~sensitivities, x = ~ 1 - specificities, type = "scatter", text = ~paste("Thresh:", thresholds), hoverinfo = text)
+plot_ly(data = as.data.frame(shape_roc[2:4]), y = ~sensitivities, x = ~ 1 - specificities, type = "scatter", text = ~paste("Thresh:", thresholds), hoverinfo = text)
 
 LSag <- read.csv(file = "KS_ag_raw.csv", header = TRUE)
 LSag$ID <- as.character(LSag$ID)

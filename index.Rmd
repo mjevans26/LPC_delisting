@@ -47,19 +47,19 @@ summary(cars)
 
 We identified 713 turbines constructed between located within LPC habitat.  Buffering each of these by 667m, equates to 129,739 ac subject to mitigation banking.
 
-378 wells were reported
+378 wells were reported, of which 309 could be detected.  We identified well pads within 500m of 188 of these 309 locations.
 
-Kansas reported 163 with 'Year Start' of 2016 or 2017 (28 detected)* 46
-New Mexico reported 63 with spud date after 09/01/2015 (58) detected
-Texas reported 132 with completion date after 09/01/2015 (89 detected) * 38
-Colorado reported 1 with 'spud date' afte 09/01/2015 (1 detected)
-Oklahoma reported 19 (2 detected *) 13
+Kansas reported 163 with 'Year Start' of 2016 or 2017.  All were evaluated, 46 detected.
+New Mexico reported 63 with spud date after 09/01/2015 25 evaluated, 23 detected
+Texas reported 132 with completion date after 09/01/2015 105 evaluated 49 detected
+Colorado reported 1 with 'spud date' afte 09/01/2015 1 evaluated 1 detected
+Oklahoma reported 19 16 evaluated 3 detected
 
-Of these, we detected 178 wells within 500m of reported locations.  This rate was lowest in
+Of these, we detected 178 wells within 500m of reported locations.  This equated to 3150 acres of potential mitigation.
 
 These discrepancies may arise for several reasons, inaccurately reported cooridnates, inaccurate dates either signifying well construction occurred later than in reality, or delays in construction.
 
-131 + 24 additional 'pad-like' disturbances were detected at least 500m from reported pads.  This is a potential ~ 30,000 acres of mitigation.
+151 + 28 additional 'pad-like' disturbances were detected at least 500m from reported pads.  This is a potential ~ 4569+1231 acres of mitigation.
 ## Including Plots
 
 You can also embed plots, for example:
