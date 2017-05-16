@@ -1,8 +1,17 @@
 ---
-title: "Use of Recovery Units"
-author: "Michael Evans, Jacob Malcom, Ya-Wei Li, Ryan Covington"
-date: "December 5, 2016"
-output: word_document
+title: "Remote Sensing Lesser Prairie Chicken"
+author: "Defenders of Wildlife"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    css: custom.css
+    df_print: paged
+    fig_caption: yes
+    fig_width: 7
+    highlight: tango
+    toc: true
+    toc_depth: 3
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
