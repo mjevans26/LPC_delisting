@@ -1,6 +1,8 @@
 library(plotly)
 library(pROC)
 library(MASS)
+library(pscl)
+library(dplyr)
 #inverse gamma function to estimate variance given sample size
 invgammapdf <- function(x, n, v){
   alpha <- n/2
@@ -25,7 +27,8 @@ new2 <- group_by(ndvi_raw, feat)%>%summarise(Class = first(Class),
                                              NDVI_max = median(NDVI_max),
                                              NDVI_var = median(NDVI_variance),
                                              NDVI_mean = median(NDVI_mean),
-                                             count = mode(NDVI_count))
+                                             NDVI_disp = median(disp),
+                                             count = median(NDVI_count))
 -3.33734 + ( "RATIO"*(1-"CONVEX")*-0.2876616) +(94.4642983*("Shape_Area"/(POWER("Shape_Leng",2)/4*3.14))/0.000247)< -0.4
 ##Shape and Landcover data from Arc, after filtering for well detection output polygons
 ## 1 > x < 15 acres, and falling in scrub or grassland.

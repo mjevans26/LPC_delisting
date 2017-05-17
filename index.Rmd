@@ -74,7 +74,53 @@ These discrepancies may arise for several reasons, inaccurately reported cooridn
 You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE}
-plot(pressure)
+plot_ly(data = new2, x = ~ (NDVI_max)*(count+1)/count, y = ~ NDVI_var, color = ~ Class, type = "scatter", mode = "markers", text = ~paste(feat, count), hoverinfo = text)
+
+plot_ly(data = ndvi_raw[ndvi_raw$Class == 2 & ndvi_raw$NDVI_count > 4,], x = ~(NDVI_max)*(NDVI_count+1)/NDVI_count, type = "histogram")
+
+plot_ly(data = new2, x = ~ (NDVI_max), y = ~ NDVI_disp, color = ~ Class, type = "scatter", mode = "markers", text = ~paste(feat, count), hoverinfo = text)
+
+plot_ly(data = ndvi_raw[ndvi_raw$Class == 1 & ndvi_raw$NDVI_count > 5,], x = ~(NDVI_max), type = "histogram")
+
+hist(ndvi_raw$NDVI_var[ndvi_raw$Class == 2 & ndvi_raw$NDVI_count > 5 & ndvi_raw$feat %in% tier1], freq = FALSE, breaks = 50)
+
+hist(ndvi_raw$NDVI_max[ndvi_raw$Class == 1 & ndvi_raw$NDVI_count > 5], freq = FALSE, breaks = 50)
+
+fit1var <- fitdist(ndvi_raw$NDVI_var[ndvi_raw$Class == 1 & ndvi_raw$NDVI_count > 5], "invgamma", start = list(a=3, b=0.03))
+
+curve(dinvgamma(x, fit1var$estimate[1], fit1var$estimate[2]), from = 0.001, to = 0.05, lwd = 2, add = TRUE)
+
+dist23var <- curve(dinvgamma(x, 2.75, 0.07), from = 0.001, to = 0.2, add = TRUE, lwd = 2)
+
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+dgev <- function(x, loc, scl, shp){
+  t <- if(shp != 0){
+    (1+(shp*((x-loc)/scl)))^(-1/shp)
+    }else{
+    exp(-(x-loc)/scl)
+    }
+  d <- (1/scl)*(t^(shp+1))*exp(-t)
+  return(d)
+}
+
+pgev <- function(q, loc, scl, shp){
+  t <- if(shp != 0){
+    (1+(shp*((x-loc)/scl)))^(-1/shp)
+    }else{
+    exp(-(x-loc)/scl)
+    }
+  p <- exp(-t)   
+}
+
+dinvgamma <- function(x, a, b){
+ d <- (b^a)/gamma(a)*(x^(-a-1))*exp(-b/x)
+ return(d)
+}
+
+pinvgamma <- function(q, a, b){
+ p <- pscl::pigamma(q, a, b)
+ return(p)
+}
