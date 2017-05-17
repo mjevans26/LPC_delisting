@@ -11,15 +11,21 @@ invgammapdf <- function(x, n, v){
 (beta^alpha)/factorial(alpha-1)*(0.5^(-alpha-1))*exp(-1*beta/0.5)
 
 ndvi_raw <- read.csv("N_NDVI_class_data.csv", header = TRUE, sep = ",")
+ndvi_raw$system.index <- as.character(ndvi_raw$system.index)
+ndvi_raw$feat <- 0
 for(i in 1:nrow(ndvi_raw)){
-  if(new$Class[i] == 0){
-    new$feat[i] <- paste(str_split(ndvi_raw$system.index[i], "_")[[1]][1:2], collapse = "")
+  if(ndvi_raw$Class[i] == 0){
+    ndvi_raw$feat[i] <- paste(str_split(ndvi_raw$system.index[i], "_")[[1]][1:2], collapse = "")
   }else{
-    new$feat[i] <- paste(str_split(ndvi_raw$system.index[i], "_")[[1]][1:3], collapse = "")
+    ndvi_raw$feat[i] <- paste(str_split(ndvi_raw$system.index[i], "_")[[1]][1:3], collapse = "")
   }
 }
 
-new2 <- group_by(new, feat)%>%summarise(Class = first(Class), NDVI = median(NDVI), NDVI_var = median(NDVI_variance))
+new2 <- group_by(ndvi_raw, feat)%>%summarise(Class = first(Class),
+                                             NDVI_max = median(NDVI_max),
+                                             NDVI_var = median(NDVI_variance),
+                                             NDVI_mean = median(NDVI_mean),
+                                             count = mode(NDVI_count))
 -3.33734 + ( "RATIO"*(1-"CONVEX")*-0.2876616) +(94.4642983*("Shape_Area"/(POWER("Shape_Leng",2)/4*3.14))/0.000247)< -0.4
 ##Shape and Landcover data from Arc, after filtering for well detection output polygons
 ## 1 > x < 15 acres, and falling in scrub or grassland.
