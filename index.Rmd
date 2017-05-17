@@ -92,6 +92,7 @@ curve(dinvgamma(x, fit1var$estimate[1], fit1var$estimate[2]), from = 0.001, to =
 
 dist23var <- curve(dinvgamma(x, 2.75, 0.07), from = 0.001, to = 0.2, add = TRUE, lwd = 2)
 
+plot(density(rgamma(5000, fit1var$estimate[1], fit1var$estimate[2]) - rgamma(5000, fit22var$estimate[1], fit22var$estimate[2])))
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
