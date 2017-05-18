@@ -3,6 +3,8 @@ library(pROC)
 library(MASS)
 library(pscl)
 library(dplyr)
+library(EnvStats)
+library(fitdistrplus)
 #inverse gamma function to estimate variance given sample size
 invgammapdf <- function(x, n, v){
   alpha <- n/2
@@ -145,3 +147,46 @@ intercept <- function(input, model, prediction, i){
   sum(input$cv_z[i]*model$scaling["cv_z",1], input$rcv_z[i]*model$scaling["rcv_z",1],
       input$ndvi_z[i]*model$scaling["ndvi_z",1], input$ndsi_z[i]*model$scaling["ndsi_z",1])
 }
+
+distdiff <- function(d1, d2, iters){
+  v <- rep(NA, iters)
+  for(i in 1:iters){
+    v[i] <- d1-d2
+  }
+  d <- density(v)
+  pdf <- cbind(d$x, d$y/sum(d$y))
+  colnames(pdf) <- c("x", "y")
+  return(pdf)
+}
+
+pdiff11 <- distdiff(rweibull(1, fit1$estimate[1], fit1$estimate[2]),
+                     rweibull(1, fit1$estimate[1], fit1$estimate[2]),
+                     5000)
+
+pdiff121 <- distdiff(rweibull(1, fit1$estimate[1], fit1$estimate[2]),
+                     rgevd(1, fit21$estimate[1], fit21$estimate[2], fit21$estimate[3]),
+                     5000)
+
+pdiff122 <- distdiff(rweibull(1, fit1$estimate[1], fit1$estimate[2]),
+                     rgevd(1, fit22$estimate[1], fit22$estimate[2], fit22$estimate[3]),
+                     5000)
+
+pdiff123 <- distdiff(rweibull(1, fit1$estimate[1], fit1$estimate[2]),
+                     rgevd(1, fit23$estimate[1], fit23$estimate[2], fit23$estimate[3]),
+                     5000)
+
+pdiff11var <- distdiff(rgamma(1, fit1var$estimate[1], fit1var$estimate[2]),
+                        rgamma(1, fit1var$estimate[1], fit1var$estimate[2]),
+                        5000)
+
+pdiff121var <- distdiff(rgamma(1, fit1var$estimate[1], fit1var$estimate[2]),
+                     rgamma(1, fit21var$estimate[1], fit21var$estimate[2]),
+                     5000)
+
+pdiff122var <- distdiff(rgamma(1, fit1var$estimate[1], fit1var$estimate[2]),
+                     rgamma(1, fit22var$estimate[1], fit22var$estimate[2]),
+                     5000)
+
+pdiff123var <- distdiff(rgamma(1, fit1var$estimate[1], fit1var$estimate[2]),
+                     rgamma(1, fit23var$estimate[1], fit23var$estimate[2]),
+                     5000)
