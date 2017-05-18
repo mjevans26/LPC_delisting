@@ -190,3 +190,16 @@ pdiff122var <- distdiff(rgamma(1, fit1var$estimate[1], fit1var$estimate[2]),
 pdiff123var <- distdiff(rgamma(1, fit1var$estimate[1], fit1var$estimate[2]),
                      rgamma(1, fit23var$estimate[1], fit23var$estimate[2]),
                      5000)
+
+p1 <- plot_ly(type = "scatter", mode = "lines")%>%
+  add_trace(x = ~pdiff11var[,1], y = ~pdiff11var[,2], line = list(color = "black"))%>%
+  add_trace(x = ~pdiff121var[,1], y = ~pdiff121var[,2], line = list(color = "orange"))%>%
+  add_trace(x = ~pdiff122var[,1], y = ~pdiff122var[,2], line = list(color = "green"))%>%
+  add_trace(x = ~pdiff123var[,1], y = ~pdiff123var[,2], line = list(color = "blue"))
+
+p2 <- plot_ly(type = "scatter", mode = "lines")%>%
+  add_trace(x = ~pdiff11[,1], y = ~pdiff11[,2], line = list(color = "black"))%>%
+  add_trace(x = ~pdiff121[,1], y = ~pdiff121[,2], line = list(color = "orange"))%>%
+  add_trace(x = ~pdiff122[,1], y = ~pdiff122[,2], line = list(color = "green"))%>%
+  add_trace(x = ~pdiff123[,1], y = ~pdiff123[,2], line = list(color = "blue"))
+subplot(p1, p2, nrows = 2)

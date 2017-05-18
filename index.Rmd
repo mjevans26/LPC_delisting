@@ -74,7 +74,9 @@ These discrepancies may arise for several reasons, inaccurately reported cooridn
 You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE}
-plot_ly(data = new2, x = ~ (NDVI_max)*(count+1)/count, y = ~ NDVI_var, color = ~ Class, type = "scatter", mode = "markers", text = ~paste(feat, count), hoverinfo = text)
+plot_ly()%>%
+  add_trace(data = new2, x = ~ (NDVI_max)*(count+1)/count, y = ~ NDVI_var, color = ~ Class, type = "scatter", mode = "markers", text = ~paste(feat, count), hoverinfo = text)%>%
+add_trace(x = ~c(0.2, 0.8), y = ~c(0.15, 0), type = 'scatter', mode = 'lines')
 
 plot_ly(data = ndvi_raw[ndvi_raw$Class == 2 & ndvi_raw$NDVI_count > 4,], x = ~(NDVI_max)*(NDVI_count+1)/NDVI_count, type = "histogram")
 
