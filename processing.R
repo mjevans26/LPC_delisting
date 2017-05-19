@@ -159,6 +159,7 @@ distdiff <- function(d1, d2, iters){
   return(pdf)
 }
 
+#difference in best fit parametric distributions *done on variances
 pdiff11 <- distdiff(rweibull(1, fit1$estimate[1], fit1$estimate[2]),
                      rweibull(1, fit1$estimate[1], fit1$estimate[2]),
                      5000)
@@ -179,23 +180,27 @@ pdiff11var <- distdiff(rgamma(1, fit1var$estimate[1], fit1var$estimate[2]),
                         rgamma(1, fit1var$estimate[1], fit1var$estimate[2]),
                         5000)
 
-pdiff121var <- distdiff(rgamma(1, fit1var$estimate[1], fit1var$estimate[2]),
+pdiff31var <- distdiff(rgamma(1, fit23var$estimate[1], fit23var$estimate[2]),
                      rgamma(1, fit21var$estimate[1], fit21var$estimate[2]),
                      5000)
 
-pdiff122var <- distdiff(rgamma(1, fit1var$estimate[1], fit1var$estimate[2]),
-                     rgamma(1, fit22var$estimate[1], fit22var$estimate[2]),
+pdiff21var <- distdiff(rgamma(1, fit22var$estimate[1], fit22var$estimate[2]),
+                     rgamma(1, fit21var$estimate[1], fit21var$estimate[2]),
                      5000)
 
-pdiff123var <- distdiff(rgamma(1, fit1var$estimate[1], fit1var$estimate[2]),
+pdiff23var <- distdiff(rgamma(1, fit22var$estimate[1], fit22var$estimate[2]),
                      rgamma(1, fit23var$estimate[1], fit23var$estimate[2]),
                      5000)
 
 p1 <- plot_ly(type = "scatter", mode = "lines")%>%
   add_trace(x = ~pdiff11var[,1], y = ~pdiff11var[,2], line = list(color = "black"))%>%
   add_trace(x = ~pdiff121var[,1], y = ~pdiff121var[,2], line = list(color = "orange"))%>%
-  add_trace(x = ~pdiff122var[,1], y = ~pdiff122var[,2], line = list(color = "green"))%>%
-  add_trace(x = ~pdiff123var[,1], y = ~pdiff123var[,2], line = list(color = "blue"))
+  add_trace(x = ~pdiff122var[,1], y = ~pdiff122var[,2], line = list(color = "orange"))%>%
+  add_trace(x = ~pdiff123var[,1], y = ~pdiff123var[,2], line = list(color = "orange"))%>%
+  add_trace(x = ~pdiff21var[,1], y = ~pdiff21var[,2], line = list(color = "black"))%>%
+  add_trace(x = ~pdiff31var[,1], y = ~pdiff31var[,2], line = list(color = "black"))%>%
+  add_trace(x = ~pdiff23var[,1], y = ~pdiff23var[,2], line = list(color = "black"))
+  
 
 p2 <- plot_ly(type = "scatter", mode = "lines")%>%
   add_trace(x = ~pdiff11[,1], y = ~pdiff11[,2], line = list(color = "black"))%>%
@@ -203,3 +208,69 @@ p2 <- plot_ly(type = "scatter", mode = "lines")%>%
   add_trace(x = ~pdiff122[,1], y = ~pdiff122[,2], line = list(color = "green"))%>%
   add_trace(x = ~pdiff123[,1], y = ~pdiff123[,2], line = list(color = "blue"))
 subplot(p1, p2, nrows = 2)
+
+#difference in observed distributions of dispersion values
+pdiff121var <- distdiff(sample(ndvi_raw$disp[ndvi_raw$Class == 1
+                                            & ndvi_raw$NDVI_count > 5],
+                              1, replace = TRUE),
+                       sample(ndvi_raw$disp[ndvi_raw$Class == 2
+                                            & ndvi_raw$NDVI_count > 5
+                                            & ndvi_raw$feat %in% tier1],
+                              1, replace = TRUE),
+                       5000)
+
+pdiff122var <- distdiff(sample(ndvi_raw$disp[ndvi_raw$Class == 1
+                                             & ndvi_raw$NDVI_count > 5],
+                               1, replace = TRUE),
+                        sample(ndvi_raw$disp[ndvi_raw$Class == 2
+                                             & ndvi_raw$NDVI_count > 5
+                                             & ndvi_raw$feat %in% tier2],
+                               1, replace = TRUE),
+                        5000)
+
+pdiff123var <- distdiff(sample(ndvi_raw$disp[ndvi_raw$Class == 1
+                                             & ndvi_raw$NDVI_count > 5],
+                               1, replace = TRUE),
+                        sample(ndvi_raw$disp[ndvi_raw$Class == 2
+                                             & ndvi_raw$NDVI_count > 5
+                                             & ndvi_raw$feat %in% tier3],
+                               1, replace = TRUE),
+                        5000)
+
+pdiff21var <- distdiff(sample(ndvi_raw$disp[ndvi_raw$Class == 2
+                                            & ndvi_raw$NDVI_count > 5
+                                            & ndvi_raw$feat %in% tier2],
+                              1, replace = TRUE),
+                       sample(ndvi_raw$disp[ndvi_raw$Class == 2
+                                            & ndvi_raw$NDVI_count > 5
+                                            & ndvi_raw$feat %in% tier1],
+                              1, replace = TRUE),
+                       5000)
+
+pdiff23var <- distdiff(sample(ndvi_raw$disp[ndvi_raw$Class == 2
+                                            & ndvi_raw$NDVI_count > 5
+                                            & ndvi_raw$feat %in% tier2],
+                              1, replace = TRUE),
+                       sample(ndvi_raw$disp[ndvi_raw$Class == 2
+                                            & ndvi_raw$NDVI_count > 5
+                                            & ndvi_raw$feat %in% tier3],
+                              1, replace = TRUE),
+                       5000)
+
+pdiff31var <- distdiff(sample(ndvi_raw$disp[ndvi_raw$Class == 2
+                                            & ndvi_raw$NDVI_count > 5
+                                            & ndvi_raw$feat %in% tier3],
+                              1, replace = TRUE),
+                       sample(ndvi_raw$disp[ndvi_raw$Class == 2
+                                            & ndvi_raw$NDVI_count > 5
+                                            & ndvi_raw$feat %in% tier1],
+                              1, replace = TRUE),
+                       5000)
+
+plot_ly(type = "scatter", mode = "lines")%>%
+  add_trace(x = ~pdiff121var[,1], y = ~pdiff121var[,2], line = list(color = "orange"))%>%
+  add_trace(x = ~pdiff122var[,1], y = ~pdiff122var[,2], line = list(color = "orange"))%>%
+  add_trace(x = ~pdiff123var[,1], y = ~pdiff123var[,2], line = list(color = "orange"))%>%
+  add_trace(x = ~pdiff21var[,1], y = ~pdiff21var[,2], line = list(color = "black"))%>%
+  add_trace(x = ~pdiff31var[,1], y = ~pdiff31var[,2], line = list(color = "black"))%>%
+  add_trace(x = ~pdiff23var[,1], y = ~pdiff23var[,2], line = list(color = "black"))
