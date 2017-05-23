@@ -14,7 +14,7 @@ invgammapdf <- function(x, n, v){
 
 (beta^alpha)/factorial(alpha-1)*(0.5^(-alpha-1))*exp(-1*beta/0.5)
 
-ndvi_raw <- read.csv("N_NDVI_class_data.csv", header = TRUE, sep = ",")
+ndvi_raw <- read.csv("cdl_ndvivalues.csv", header = TRUE, sep = ",")
 ndvi_raw$system.index <- as.character(ndvi_raw$system.index)
 ndvi_raw$feat <- 0
 for(i in 1:nrow(ndvi_raw)){
