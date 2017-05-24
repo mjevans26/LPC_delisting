@@ -192,85 +192,125 @@ pdiff23var <- distdiff(rgamma(1, fit22var$estimate[1], fit22var$estimate[2]),
                      rgamma(1, fit23var$estimate[1], fit23var$estimate[2]),
                      5000)
 
-p1 <- plot_ly(type = "scatter", mode = "lines")%>%
-  add_trace(x = ~pdiff11var[,1], y = ~pdiff11var[,2], line = list(color = "black"))%>%
-  add_trace(x = ~pdiff121var[,1], y = ~pdiff121var[,2], line = list(color = "orange"))%>%
-  add_trace(x = ~pdiff122var[,1], y = ~pdiff122var[,2], line = list(color = "orange"))%>%
-  add_trace(x = ~pdiff123var[,1], y = ~pdiff123var[,2], line = list(color = "orange"))%>%
-  add_trace(x = ~pdiff21var[,1], y = ~pdiff21var[,2], line = list(color = "black"))%>%
-  add_trace(x = ~pdiff31var[,1], y = ~pdiff31var[,2], line = list(color = "black"))%>%
-  add_trace(x = ~pdiff23var[,1], y = ~pdiff23var[,2], line = list(color = "black"))
-  
-
-p2 <- plot_ly(type = "scatter", mode = "lines")%>%
-  add_trace(x = ~pdiff11[,1], y = ~pdiff11[,2], line = list(color = "black"))%>%
-  add_trace(x = ~pdiff121[,1], y = ~pdiff121[,2], line = list(color = "orange"))%>%
-  add_trace(x = ~pdiff122[,1], y = ~pdiff122[,2], line = list(color = "green"))%>%
-  add_trace(x = ~pdiff123[,1], y = ~pdiff123[,2], line = list(color = "blue"))
+p1 <- plot_ly(ndvi_raw, type = "histogram", alpha = 0.6)%>%
+  add_trace(x = ~NDVI[cropland == 1 & NDVI_count > 5], name = 'corn')%>%
+  add_trace(x = ~NDVI[cropland == 4& NDVI_count > 5], name = 'sorghum')%>%
+  add_trace(x = ~NDVI[cropland == 24 & NDVI_count > 5], name = 'winter wheat')%>%
+  add_trace(x = ~NDVI[cropland == 61 & NDVI_count > 5], name = 'barren')%>%
+  add_trace(x = ~NDVI[cropland == 36 & NDVI_count > 5], name = 'alfalfa')%>%
+  add_trace(x = ~NDVI[cropland == 152|cropland == 176 & NDVI_count > 5], name = 'habitat')%>%
+  layout(barmode = "overlay")
+p2 <- plot_ly(ndvi_raw, type = "histogram", alpha = 0.6)%>%
+  add_trace(x = ~NDVI_disp[cropland == 1 & NDVI_count > 5], name = 'corn')%>%
+  add_trace(x = ~NDVI_disp[cropland == 4& NDVI_count > 5], name = 'sorghum')%>%
+  add_trace(x = ~NDVI_disp[cropland == 24 & NDVI_count > 5], name = 'winter wheat')%>%
+  add_trace(x = ~NDVI_disp[cropland == 61 & NDVI_count > 5], name = 'barren')%>%
+  add_trace(x = ~NDVI_disp[cropland == 36 & NDVI_count > 5], name = 'alfalfa')%>%
+  add_trace(x = ~NDVI_disp[cropland == 152|cropland == 176 & NDVI_count > 5], name = 'habitat')%>%
+  layout(barmode = "overlay")
 subplot(p1, p2, nrows = 2)
 
 #difference in observed distributions of dispersion values
-pdiff121var <- distdiff(sample(ndvi_raw$disp[ndvi_raw$Class == 1
+d_hab_hab <- distdiff(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
+                                          |ndvi_raw$cropland == 176
+                                          & ndvi_raw$NDVI_count > 5],
+                              1, replace = TRUE),
+                         sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
+                                                   |ndvi_raw$cropland == 176
+                                                   & ndvi_raw$NDVI_count > 5],
+                                1, replace = TRUE),
+                       5000)
+
+d_hab_corn <- distdiff(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
+                                                    |ndvi_raw$cropland == 176
+                                                    & ndvi_raw$NDVI_count > 5],
+                                 1, replace = TRUE),
+                          sample(ndvi_raw$NDVI[ndvi_raw$cropland == 1
+                                                    & ndvi_raw$NDVI_count > 5],
+                                 1, replace = TRUE),
+                        5000)
+
+d_hab_wheat <- distdiff(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
+                                                     |ndvi_raw$cropland == 176
+                                                     & ndvi_raw$NDVI_count > 5],
+                                  1, replace = TRUE),
+                           sample(ndvi_raw$NDVI[ndvi_raw$cropland == 24
+                                                     & ndvi_raw$NDVI_count > 5],
+                                  1, replace = TRUE),
+                           5000)
+
+d_hab_gum <- distdiff(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
+                                                     |ndvi_raw$cropland == 176
+                                                     & ndvi_raw$NDVI_count > 5],
+                                  1, replace = TRUE),
+                           sample(ndvi_raw$NDVI[ndvi_raw$cropland == 4
+                                                     & ndvi_raw$NDVI_count > 5],
+                                  1, replace = TRUE),
+                           5000)
+
+d_hab_bare <- distdiff(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
+                                                     |ndvi_raw$cropland == 176
+                                                     & ndvi_raw$NDVI_count > 5],
+                                  1, replace = TRUE),
+                           sample(ndvi_raw$NDVI[ndvi_raw$cropland == 61
+                                                     & ndvi_raw$NDVI_count > 5],
+                                  1, replace = TRUE),
+                           5000)
+
+d_hab_alph <- distdiff(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
+                                                     |ndvi_raw$cropland == 176
+                                                     & ndvi_raw$NDVI_count > 5],
+                                  1, replace = TRUE),
+                           sample(ndvi_raw$NDVI[ndvi_raw$cropland == 36
+                                                     & ndvi_raw$NDVI_count > 5],
+                                  1, replace = TRUE),
+                           5000)
+
+dvar_crp_crp <- distdiff(sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 1
+                                            |ndvi_raw$cropland == 24
+                                           |ndvi_raw$cropland == 36
+                                           |ndvi_raw$cropland == 4
                                             & ndvi_raw$NDVI_count > 5],
                               1, replace = TRUE),
-                       sample(ndvi_raw$disp[ndvi_raw$Class == 2
-                                            & ndvi_raw$NDVI_count > 5
-                                            & ndvi_raw$feat %in% tier1],
+                       sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 1
+                                            |ndvi_raw$cropland == 24
+                                            |ndvi_raw$cropland == 36
+                                            |ndvi_raw$cropland == 4
+                                            & ndvi_raw$NDVI_count > 5],
                               1, replace = TRUE),
-                       5000)
+                       20000)
 
-pdiff122var <- distdiff(sample(ndvi_raw$disp[ndvi_raw$Class == 1
-                                             & ndvi_raw$NDVI_count > 5],
-                               1, replace = TRUE),
-                        sample(ndvi_raw$disp[ndvi_raw$Class == 2
-                                             & ndvi_raw$NDVI_count > 5
-                                             & ndvi_raw$feat %in% tier2],
-                               1, replace = TRUE),
-                        5000)
 
-pdiff123var <- distdiff(sample(ndvi_raw$disp[ndvi_raw$Class == 1
-                                             & ndvi_raw$NDVI_count > 5],
-                               1, replace = TRUE),
-                        sample(ndvi_raw$disp[ndvi_raw$Class == 2
-                                             & ndvi_raw$NDVI_count > 5
-                                             & ndvi_raw$feat %in% tier3],
-                               1, replace = TRUE),
-                        5000)
+p3<-plot_ly(type = "scatter", mode = "lines")%>%
+  add_trace(x = ~d_crp_crp[,1], y = ~d_crp_crp[,2], line = list(color = "black"),
+            name = "crop")%>%
+  add_trace(x = ~d_hab_hab[,1], y = ~d_hab_hab[,2], line = list(color = "black"),
+            name = "hab")%>%
+  add_trace(x = ~d_hab_corn[,1], y = ~d_hab_corn[,2], line = list(color = "yellow"),
+            name = 'corn')%>%
+  add_trace(x = ~d_hab_wheat[,1], y = ~d_hab_wheat[,2], line = list(color = "brown"),
+            name = 'wheat')%>%
+  add_trace(x = ~d_hab_bare[,1], y = ~d_hab_bare[,2], line = list(color = "grey"),
+            name = 'bare')%>%
+  add_trace(x = ~d_hab_alph[,1], y = ~d_hab_alph[,2], line = list(color = "green"),
+            name = 'alphalpha')%>%
+  add_trace(x = ~d_hab_gum[,1], y = ~d_hab_gum[,2], line = list(color = "purple"),
+            name = 'sorghum')
 
-pdiff21var <- distdiff(sample(ndvi_raw$disp[ndvi_raw$Class == 2
-                                            & ndvi_raw$NDVI_count > 5
-                                            & ndvi_raw$feat %in% tier2],
-                              1, replace = TRUE),
-                       sample(ndvi_raw$disp[ndvi_raw$Class == 2
-                                            & ndvi_raw$NDVI_count > 5
-                                            & ndvi_raw$feat %in% tier1],
-                              1, replace = TRUE),
-                       5000)
+p4<-plot_ly(type = "scatter", mode = "lines")%>%
+  add_trace(x = ~dvar_crp_crp[,1], y = ~dvar_crp_crp[,2], line = list(color = "black"),
+            name = "crop")%>%
+  add_trace(x = ~dvar_hab_hab[,1], y = ~dvar_hab_hab[,2], line = list(color = "black"),
+            name = "hab")%>%
+  add_trace(x = ~dvar_hab_corn[,1], y = ~dvar_hab_corn[,2], line = list(color = "yellow"),
+            name = 'corn')%>%
+  add_trace(x = ~dvar_hab_wheat[,1], y = ~dvar_hab_wheat[,2], line = list(color = "brown"),
+            name = 'wheat')%>%
+  add_trace(x = ~dvar_hab_bare[,1], y = ~dvar_hab_bare[,2], line = list(color = "grey"),
+            name = 'bare')%>%
+  add_trace(x = ~dvar_hab_alph[,1], y = ~dvar_hab_alph[,2], line = list(color = "green"),
+            name = 'alphalpha')%>%
+  add_trace(x = ~dvar_hab_gum[,1], y = ~dvar_hab_gum[,2],line = list(color = "purple"),
+            name = 'sorghum')
 
-pdiff23var <- distdiff(sample(ndvi_raw$disp[ndvi_raw$Class == 2
-                                            & ndvi_raw$NDVI_count > 5
-                                            & ndvi_raw$feat %in% tier2],
-                              1, replace = TRUE),
-                       sample(ndvi_raw$disp[ndvi_raw$Class == 2
-                                            & ndvi_raw$NDVI_count > 5
-                                            & ndvi_raw$feat %in% tier3],
-                              1, replace = TRUE),
-                       5000)
-
-pdiff31var <- distdiff(sample(ndvi_raw$disp[ndvi_raw$Class == 2
-                                            & ndvi_raw$NDVI_count > 5
-                                            & ndvi_raw$feat %in% tier3],
-                              1, replace = TRUE),
-                       sample(ndvi_raw$disp[ndvi_raw$Class == 2
-                                            & ndvi_raw$NDVI_count > 5
-                                            & ndvi_raw$feat %in% tier1],
-                              1, replace = TRUE),
-                       5000)
-
-plot_ly(type = "scatter", mode = "lines")%>%
-  add_trace(x = ~pdiff121var[,1], y = ~pdiff121var[,2], line = list(color = "orange"))%>%
-  add_trace(x = ~pdiff122var[,1], y = ~pdiff122var[,2], line = list(color = "orange"))%>%
-  add_trace(x = ~pdiff123var[,1], y = ~pdiff123var[,2], line = list(color = "orange"))%>%
-  add_trace(x = ~pdiff21var[,1], y = ~pdiff21var[,2], line = list(color = "black"))%>%
-  add_trace(x = ~pdiff31var[,1], y = ~pdiff31var[,2], line = list(color = "black"))%>%
-  add_trace(x = ~pdiff23var[,1], y = ~pdiff23var[,2], line = list(color = "black"))
+subplot(p3, p4, nrows = 2)
