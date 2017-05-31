@@ -296,7 +296,7 @@ dvar_ag_crp <- distdiff(sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 152
 p3<-plot_ly(type = "scatter", mode = "lines")%>%
   add_trace(x = ~d_crp_crp[,1], y = ~cumsum(d_crp_crp[,2]), line = list(color = "black"),
             name = "crop")%>%
-  add_trace(x = ~d_hab_hab[,1], y = ~cumsum(d_hab_hab[,2]), line = list(color = "black"),
+  add_trace(x = ~d_hab_hab[,1], y = ~d_hab_hab[,2]/max(d_hab_hab[,2])*0.5, line = list(color = "black"),
             name = "hab")%>%
   add_trace(x = ~d_hab_corn[,1], y = ~1-cumsum(d_hab_corn[,2]), line = list(color = "yellow"),
             name = 'corn')%>%
@@ -312,7 +312,7 @@ p3<-plot_ly(type = "scatter", mode = "lines")%>%
 p4<-plot_ly(type = "scatter", mode = "lines")%>%
   add_trace(x = ~dvar_crp_crp[,1], y = ~cumsum(dvar_crp_crp[,2]), line = list(color = "black"),
             name = "crop")%>%
-  add_trace(x = ~dvar_hab_hab[,1], y = ~cumsum(dvar_hab_hab[,2]), line = list(color = "black"),
+  add_trace(x = ~dvar_hab_hab[,1], y = ~dvar_hab_hab[,2]/max(dvar_hab_hab[,2])*0.5, line = list(color = "black"),
             name = "hab")%>%
   add_trace(x = ~dvar_hab_corn[,1], y = ~1-cumsum(dvar_hab_corn[,2]), line = list(color = "yellow"),
             name = 'corn')%>%
@@ -323,6 +323,38 @@ p4<-plot_ly(type = "scatter", mode = "lines")%>%
   add_trace(x = ~dvar_hab_alph[,1], y = ~1-cumsum(dvar_hab_alph[,2]), line = list(color = "green"),
             name = 'alphalpha')%>%
   add_trace(x = ~dvar_hab_gum[,1], y = ~1-cumsum(dvar_hab_gum[,2]),line = list(color = "purple"),
+            name = 'sorghum')
+
+p5<-plot_ly(type = "scatter", mode = "lines")%>%
+  add_trace(x = ~d_crp_crp[,1], y = ~d_crp_crp[,2], line = list(color = "black"),
+            name = "crop")%>%
+  add_trace(x = ~d_hab_hab[,1], y = ~d_hab_hab[,2], line = list(color = "black"),
+            name = "hab")%>%
+  add_trace(x = ~d_hab_corn[,1], y = ~d_hab_corn[,2], line = list(color = "yellow"),
+            name = 'corn')%>%
+  add_trace(x = ~d_hab_wheat[,1], y = ~d_hab_wheat[,2], line = list(color = "brown"),
+            name = 'wheat')%>%
+  add_trace(x = ~d_hab_bare[,1], y = ~d_hab_bare[,2], line = list(color = "grey"),
+            name = 'bare')%>%
+  add_trace(x = ~d_hab_alph[,1], y = ~d_hab_alph[,2], line = list(color = "green"),
+            name = 'alphalpha')%>%
+  add_trace(x = ~d_hab_gum[,1], y = ~d_hab_gum[,2], line = list(color = "purple"),
+            name = 'sorghum')
+
+p6<-plot_ly(type = "scatter", mode = "lines")%>%
+  add_trace(x = ~dvar_crp_crp[,1], y = ~dvar_crp_crp[,2], line = list(color = "black"),
+            name = "crop")%>%
+  add_trace(x = ~dvar_hab_hab[,1], y = ~dvar_hab_hab[,2], line = list(color = "black"),
+            name = "hab")%>%
+  add_trace(x = ~dvar_hab_corn[,1], y = ~dvar_hab_corn[,2], line = list(color = "yellow"),
+            name = 'corn')%>%
+  add_trace(x = ~dvar_hab_wheat[,1], y = ~dvar_hab_wheat[,2], line = list(color = "brown"),
+            name = 'wheat')%>%
+  add_trace(x = ~dvar_hab_bare[,1], y = ~dvar_hab_bare[,2], line = list(color = "grey"),
+            name = 'bare')%>%
+  add_trace(x = ~dvar_hab_alph[,1], y = ~dvar_hab_alph[,2], line = list(color = "green"),
+            name = 'alphalpha')%>%
+  add_trace(x = ~dvar_hab_gum[,1], y = ~dvar_hab_gum[,2],line = list(color = "purple"),
             name = 'sorghum')
 
 subplot(p3, p4, nrows = 2)
@@ -336,8 +368,8 @@ distdiff2 <-function(d1, d2){
 }
 
 auc_diff <- function(d1, d2, d3, d4, d5, val){
-(sum(1-sum(d2[d2[,1] < val, 2]),
-1-sum(d3[d3[,1] < val, 2]),
-1-sum(d4[d4[,1] < val, 2]),
-1-sum(d5[d5[,1] < val, 2])) - sum(d1[d1[,1] < val, 2]))/4
+max((sum(d2[d2[,1] > val, 2]))*(1-sum(d1[d1[,1] > val, 2])),
+     (sum(d3[d3[,1] > val, 2]))*(1-sum(d1[d1[,1] > val, 2])),
+     (sum(d4[d4[,1] > val, 2]))*(1-sum(d1[d1[,1] > val, 2])),
+     (sum(d5[d5[,1] > val, 2]))*(1-sum(d1[d1[,1] > val, 2])))
 }
