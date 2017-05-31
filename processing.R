@@ -211,106 +211,133 @@ p2 <- plot_ly(ndvi_raw, type = "histogram", alpha = 0.6)%>%
 subplot(p1, p2, nrows = 2)
 
 #difference in observed distributions of dispersion values
-d_hab_hab <- distdiff(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
+d_hab_hab <- distdiff2(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
                                           |ndvi_raw$cropland == 176
                                           & ndvi_raw$NDVI_count > 5],
-                              1, replace = TRUE),
+                              5000, replace = TRUE),
                          sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
                                                    |ndvi_raw$cropland == 176
                                                    & ndvi_raw$NDVI_count > 5],
-                                1, replace = TRUE),
-                       5000)
+                                5000, replace = TRUE)
+                       )
 
-d_hab_corn <- distdiff(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
+dvar_hab_corn <- distdiff2(sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 152
                                                     |ndvi_raw$cropland == 176
                                                     & ndvi_raw$NDVI_count > 5],
-                                 1, replace = TRUE),
-                          sample(ndvi_raw$NDVI[ndvi_raw$cropland == 1
+                                 5000, replace = TRUE),
+                          sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 1
                                                     & ndvi_raw$NDVI_count > 5],
-                                 1, replace = TRUE),
-                        5000)
+                                 5000, replace = TRUE)
+                        )
 
-d_hab_wheat <- distdiff(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
+dvar_hab_wheat <- distdiff2(sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 152
                                                      |ndvi_raw$cropland == 176
                                                      & ndvi_raw$NDVI_count > 5],
-                                  1, replace = TRUE),
-                           sample(ndvi_raw$NDVI[ndvi_raw$cropland == 24
+                                  5000, replace = TRUE),
+                           sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 24
                                                      & ndvi_raw$NDVI_count > 5],
-                                  1, replace = TRUE),
-                           5000)
+                                  5000, replace = TRUE)
+                           )
 
-d_hab_gum <- distdiff(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
+dvar_hab_gum <- distdiff2(sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 152
                                                      |ndvi_raw$cropland == 176
                                                      & ndvi_raw$NDVI_count > 5],
-                                  1, replace = TRUE),
-                           sample(ndvi_raw$NDVI[ndvi_raw$cropland == 4
+                                  5000, replace = TRUE),
+                           sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 4
                                                      & ndvi_raw$NDVI_count > 5],
-                                  1, replace = TRUE),
-                           5000)
+                                  5000, replace = TRUE)
+                           )
 
-d_hab_bare <- distdiff(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
+d_hab_bare <- distdiff2(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
                                                      |ndvi_raw$cropland == 176
                                                      & ndvi_raw$NDVI_count > 5],
-                                  1, replace = TRUE),
+                                  5000, replace = TRUE),
                            sample(ndvi_raw$NDVI[ndvi_raw$cropland == 61
                                                      & ndvi_raw$NDVI_count > 5],
-                                  1, replace = TRUE),
-                           5000)
+                                  5000, replace = TRUE)
+                           )
 
-d_hab_alph <- distdiff(sample(ndvi_raw$NDVI[ndvi_raw$cropland == 152
+dvar_hab_alph <- distdiff2(sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 152
                                                      |ndvi_raw$cropland == 176
                                                      & ndvi_raw$NDVI_count > 5],
-                                  1, replace = TRUE),
-                           sample(ndvi_raw$NDVI[ndvi_raw$cropland == 36
+                                  5000, replace = TRUE),
+                           sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 36
                                                      & ndvi_raw$NDVI_count > 5],
-                                  1, replace = TRUE),
-                           5000)
+                                  5000, replace = TRUE)
+                           )
 
-dvar_crp_crp <- distdiff(sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 1
+dvar_crp_crp <- distdiff2(sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 1
                                             |ndvi_raw$cropland == 24
                                            |ndvi_raw$cropland == 36
                                            |ndvi_raw$cropland == 4
                                             & ndvi_raw$NDVI_count > 5],
-                              1, replace = TRUE),
+                              20000, replace = TRUE),
                        sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 1
                                             |ndvi_raw$cropland == 24
                                             |ndvi_raw$cropland == 36
                                             |ndvi_raw$cropland == 4
                                             & ndvi_raw$NDVI_count > 5],
-                              1, replace = TRUE),
-                       20000)
+                              20000, replace = TRUE)
+                       )
+
+dvar_ag_crp <- distdiff(sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 152
+                                                   |ndvi_raw$cropland == 176
+                                                   & ndvi_raw$NDVI_count > 5],
+                                1, replace = TRUE),
+                         sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 1
+                                                   |ndvi_raw$cropland == 24
+                                                   |ndvi_raw$cropland == 36
+                                                   |ndvi_raw$cropland == 4
+                                                   & ndvi_raw$NDVI_count > 5],
+                                1, replace = TRUE),
+                         20000)
 
 
 p3<-plot_ly(type = "scatter", mode = "lines")%>%
-  add_trace(x = ~d_crp_crp[,1], y = ~d_crp_crp[,2], line = list(color = "black"),
+  add_trace(x = ~d_crp_crp[,1], y = ~cumsum(d_crp_crp[,2]), line = list(color = "black"),
             name = "crop")%>%
-  add_trace(x = ~d_hab_hab[,1], y = ~d_hab_hab[,2], line = list(color = "black"),
+  add_trace(x = ~d_hab_hab[,1], y = ~cumsum(d_hab_hab[,2]), line = list(color = "black"),
             name = "hab")%>%
-  add_trace(x = ~d_hab_corn[,1], y = ~d_hab_corn[,2], line = list(color = "yellow"),
+  add_trace(x = ~d_hab_corn[,1], y = ~1-cumsum(d_hab_corn[,2]), line = list(color = "yellow"),
             name = 'corn')%>%
-  add_trace(x = ~d_hab_wheat[,1], y = ~d_hab_wheat[,2], line = list(color = "brown"),
+  add_trace(x = ~d_hab_wheat[,1], y = ~1-cumsum(d_hab_wheat[,2]), line = list(color = "brown"),
             name = 'wheat')%>%
-  add_trace(x = ~d_hab_bare[,1], y = ~d_hab_bare[,2], line = list(color = "grey"),
+  add_trace(x = ~d_hab_bare[,1], y = ~cumsum(d_hab_bare[,2]), line = list(color = "grey"),
             name = 'bare')%>%
-  add_trace(x = ~d_hab_alph[,1], y = ~d_hab_alph[,2], line = list(color = "green"),
+  add_trace(x = ~d_hab_alph[,1], y = ~1-cumsum(d_hab_alph[,2]), line = list(color = "green"),
             name = 'alphalpha')%>%
-  add_trace(x = ~d_hab_gum[,1], y = ~d_hab_gum[,2], line = list(color = "purple"),
+  add_trace(x = ~d_hab_gum[,1], y = ~1-cumsum(d_hab_gum[,2]), line = list(color = "purple"),
             name = 'sorghum')
 
 p4<-plot_ly(type = "scatter", mode = "lines")%>%
-  add_trace(x = ~dvar_crp_crp[,1], y = ~dvar_crp_crp[,2], line = list(color = "black"),
+  add_trace(x = ~dvar_crp_crp[,1], y = ~cumsum(dvar_crp_crp[,2]), line = list(color = "black"),
             name = "crop")%>%
-  add_trace(x = ~dvar_hab_hab[,1], y = ~dvar_hab_hab[,2], line = list(color = "black"),
+  add_trace(x = ~dvar_hab_hab[,1], y = ~cumsum(dvar_hab_hab[,2]), line = list(color = "black"),
             name = "hab")%>%
-  add_trace(x = ~dvar_hab_corn[,1], y = ~dvar_hab_corn[,2], line = list(color = "yellow"),
+  add_trace(x = ~dvar_hab_corn[,1], y = ~1-cumsum(dvar_hab_corn[,2]), line = list(color = "yellow"),
             name = 'corn')%>%
-  add_trace(x = ~dvar_hab_wheat[,1], y = ~dvar_hab_wheat[,2], line = list(color = "brown"),
+  add_trace(x = ~dvar_hab_wheat[,1], y = ~1-cumsum(dvar_hab_wheat[,2]), line = list(color = "brown"),
             name = 'wheat')%>%
-  add_trace(x = ~dvar_hab_bare[,1], y = ~dvar_hab_bare[,2], line = list(color = "grey"),
+  add_trace(x = ~dvar_hab_bare[,1], y = ~cumsum(dvar_hab_bare[,2]), line = list(color = "grey"),
             name = 'bare')%>%
-  add_trace(x = ~dvar_hab_alph[,1], y = ~dvar_hab_alph[,2], line = list(color = "green"),
+  add_trace(x = ~dvar_hab_alph[,1], y = ~1-cumsum(dvar_hab_alph[,2]), line = list(color = "green"),
             name = 'alphalpha')%>%
-  add_trace(x = ~dvar_hab_gum[,1], y = ~dvar_hab_gum[,2],line = list(color = "purple"),
+  add_trace(x = ~dvar_hab_gum[,1], y = ~1-cumsum(dvar_hab_gum[,2]),line = list(color = "purple"),
             name = 'sorghum')
 
 subplot(p3, p4, nrows = 2)
+
+distdiff2 <-function(d1, d2){
+  v <- d1-d2
+  d <- density(v)
+  pdf <- cbind(d$x, d$y/sum(d$y))
+  colnames(pdf) <- c("x", "y")
+  return(pdf)
+}
+
+auc_diff <- function(d1, d2, d3, d4, d5, val){
+(sum(1-sum(d2[d2[,1] < val, 2]),
+1-sum(d3[d3[,1] < val, 2]),
+1-sum(d4[d4[,1] < val, 2]),
+1-sum(d5[d5[,1] < val, 2])) - sum(d1[d1[,1] < val, 2]))/4
+}
