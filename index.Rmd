@@ -30,7 +30,23 @@ library(stringr)
 library(tidyr)
 ```
 
-# Methods
+## Background
+
+### Lesser Prairie-Chicken
+
+The Lesser prairie-chicken (Tympanus pallidicinctus) is a species of grouse native to regions of Colorado, Kansas, Oklahoma, Texas, and New Mexico.  Throughout their range, Lesser prairie-chicken (LPC) require a mixture of sagebrush, native grass prairie, and shrublands.  Much of this habitat has been lost as the result of conversion to agricultural land, and the distribution of LPC is now only 10% of its historical range.  LPC habitat can also be degraded by energy development, due to the species’ avoidance of tall structures – a behavior adapted to avoid aerial predators (1).
+
+In an effort to protect LPC and prevent its listing as an endangered species, the Western Association of Fish and Wildlife Agencies developed a range wide conservation plan (RWP) in 2013.  The RWP provides voluntary impact minimization, and mitigation strategies for private landowners and companies conducting activities that would degrade LPC habitat.  Lesser prairie-chicken was nevertheless listed as a threatened species under the Endangered Species Act (ESA) on March 27, 2014 (2), at which point enrollment in the RWP was offered to corporate developers as a means of fulfilling their obligation to offset LPC habitat destruction under the ESA.  A court ruling on September 1st, 2015 overturned the listing decision, and the LPC was removed from the endangered species list in April 2016.  The RWP remains, but mitigation and impact minimization programs have reverted to purely voluntary efforts.  The purpose of this analysis was to quantify the extent of energy development and habitat loss occurring since delisting, using a combination of publicly available data and remote sensing.
+
+### Remote Sensing
+
+In this analysis, the term ‘Remote sensing’ describes the use of light reflectance from earth’s surface measured by sensors on satellites, to quantify patterns of land cover and land use.  A recent proliferation of available satellite data has increased the use of remote sensing in conservation work.  Many satellite systems collect new images across the globe on a bi-weekly basis, advancing the ability to quickly detect and quantify habitat loss.  Satellite sensors also measure reflectance values beyond the visible light spectrum, including infrared and ultraviolet light, providing a greater ability to distinguish among land cover types, and features on the earth’s surface, than photographs.  
+In this analysis, we used Google Earth Engine - a platform providing access to terabytes of real-time satellite data, and the cloud computing capabilities to analyze them – to create an automated process to detect wind turbines, oil and gas wells, and habitat loss throughout the LPC’s range.  The basic overview of the process shown in Figure 1 is:
+
+1.	Acquire ‘before’ and ‘after’ satellite data
+2.	Calculate changes in earth surface reflectance values
+3.	Select pixels exceeding reflectance change thresholds
+4.	Distinguish man-made vs. natural changes
 
 ### Data
 
@@ -52,23 +68,96 @@ If suitable sentinel data was not available before the well date, we compared ae
 summary(cars)
 ```
 
-### Results
+## Results
 
-We identified 713 turbines constructed between located within LPC habitat.  Buffering each of these by 667m, equates to 129,739 ac subject to mitigation banking.
+### Wind Energy Development
 
-378 wells were reported, of which 309 could be detected.  We identified well pads within 500m of 188 of these 309 locations.
+Using our automated change detection procedure, we identified 5 wind farms with a total of 713 turbines constructed after September 1st, 2015 within LPC range.  The LPC range wide plan uses a buffer of 667m around turbines to determine the area for which mitigation is needed.  Under the RWP, construction of these 713 turbines would create 129,739 acres of potential mitigation area.  From a biological perspective, LPC avoid tall structures up to 1 mile away, and areas within 1 mile of wind turbines are considered biologically disturbed, or degraded habitat (3).  When a 1 mile buffer is considered, these 713 turbines create 257,577 acres of habitat disturbance for LPC.
 
-Kansas reported 163 with 'Year Start' of 2016 or 2017.  All were evaluated, 46 detected.
-New Mexico reported 63 with spud date after 09/01/2015 25 evaluated, 23 detected
-Texas reported 132 with completion date after 09/01/2015 105 evaluated 49 detected
-Colorado reported 1 with 'spud date' afte 09/01/2015 1 evaluated 1 detected
-Oklahoma reported 19 16 evaluated 3 detected
+### Oil and Gas
 
-Of these, we detected 178 wells within 500m of reported locations.  This equated to 3150 acres of potential mitigation.
+Oil and gas drilling permits and production records are maintained by state oil and gas commissions, including project start dates and well locations.  In theory, these records can be used to measure the number and location of disturbances within LPC habitat due to oil and gas drilling.  We obtained all records (378) of new wells reported after September 1st 2015 located within LPC range, and verified the construction of a new well using before and after satellite imagery where available.  Satellite images revealed new wells within 500m of reported locations for only 178 records (57%) of 310 that we could inspect (Table 1).
 
-These discrepancies may arise for several reasons, inaccurately reported cooridnates, inaccurate dates either signifying well construction occurred later than in reality, or delays in construction.
+```{r p1, echo=FALSE, warning=FALSE, error=FALSE}
+fluidPage(
+  fluidRow(
+    column(12,
+      p(class = "caption",
+        tags$b("Table 1."), " Counts of new oil and ga wells reported by state oil and gas commissions constructed after Spetember 1", tags$sup("st"), "2015, and located within Lesser -rairie-chicken range.")
+    )
+  ),
+  fluidRow(
+    div(
+    column(12,
+  DT::datatable(tab,
+                    fillContainer = TRUE,
+                    selection = list(mode = 'single', 
+                                     #selected = which(Bay16$SITE == input$sites), 
+                                     target = 'row'),
+                    colnames = c("Site", "Turbines", "Survey Effort (hr*km2)",
+                                 "Eagle Obs (min)"),
+                  options = list(rownames = FALSE,
+                                 pageLength = nrow(tab),
+                                 dom = 'tip'
+                                 )
+                )%>%
+  DT::formatRound("EFFORT", 2)
+    ))
+  )
+)
+```
 
-151 + 28 additional 'pad-like' disturbances were detected at least 500m from reported pads.  This is a potential ~ 4569+1231 acres of mitigation.
+These discrepancies could be caused by errors in recording dates and/or coordinates, unreported changes in project timelines, or in many cases, vague constructions dates.  For instance, New Mexico reports a ‘Spud date,’ the date on which ground was broken when drilling a new well.  Kansas provides a ‘Year Start’ with well records, which leaves the actual date at which a new well is constructed ambiguous.  We confirmed the construction of new wells at 92% of reported locations that were checked in New Mexico, but only 28% of those in Kansas.
+
+Applying our change detection algorithm across LPC range identified 179 new well pads that appeared in LPC habitat since delisting, which did not correspond to any coordinates provided by the states (> 500m from any reported location).  The RWP uses a buffer of 200 meters around oil and gas wells to determine the area for which mitigation is needed.  The 178 reported wells we identified create 3,150 acres of potential mitigation area, after excluding areas around wells built in already degraded habitat.  The 179 additional wells we identified - that were not associated with oil and gas commission records - created an additional 5,800 acres of potential mitigation area.  
+
+```{r p1, echo=FALSE, warning=FALSE, error=FALSE}
+fluidPage(
+  fluidRow(),
+  fluidRow(
+    column(12,
+           p(class = 'caption',
+             tags$b("Figure 2."), "Exapmle of oil well pads constructed after September 1", tags$sup("st"), ", 2015 identified by automated land cover change detection.")
+    )
+  )
+)
+```
+
+In total, we detected 1,070 disturbances due to energy development within LPC range since the species was delisted, creating 138,689 acres of potential mitigation area under the RWP (Figure 3).  It is important to note that the thresholds we used to detect well pads and wind turbines were selected to minimize the chance of false positives. Due to this conservative approach, some true disturbances were eliminated from consideration by our algorithms, and the numbers reported represent a minimum amount of disturbance in LPC habitat occurring since delisting.
+
+```{r p1, echo=FALSE, warning=FALSE, error=FALSE}
+fluidPage(
+  fluidRow(),
+  fluidRow(
+    column(12,
+      p(class = 'caption',
+        tags$b("Figure 3."), " Locations of wind farms, oil and gas wells constructed within Lesser prairie-chicken habitat constructed after September 1", tags$sup("st"), ", 2015 identified by automated land cover change detection.  The range used is tha tocnsidered in the range-wide plan for evaluating the need for mitigation.  This is a 10 mile buffered area around existing LPC habitat")
+    )
+  )
+)
+```
+
+### Habitat Loss
+
+In addition to tracking energy development, we wanted to estimate the overall loss of LPC habitat across the species’ range since delisting.  The majority of habitat loss is from conversion of native grass prairie and shrubland to agriculture.  Using annual cropland data from the U.S. Department of Agriculture, we estimate between 85,000 and 184,000 acres of LPC habitat was converted to agriculture from 2015 to 2016 (Figure 4).  The range of estimated acreage is based on different level of confidence in the classification USDA assigns to each pixel.  The lower value of 85,000 acres was calculated only from areas with > 90% confidence that LPC habitat in 2015 was converted to agriculture in 2016.   Lowering this confidence threshold to 75% produces an estimated 184,000 acres converted.  We cross-validated these estimates against a calculation using the maximum, and variation in greenness over the course of the growing season.  Using this approach, an estimate with 75% confidence indicated 184,000 acres were converted.
+
+```{r p1, echo=FALSE, warning=FALSE, error=FALSE}
+fluidPage(
+  fluidRow(),
+  fluidRow(
+    column(12,
+           p(class = 'caption',
+             tags$b("Figure 4."), " Conversion of Lesser priairie-chicken habitat to agriculture between 2015 and 2016.  A raw score of conversion probability (a) was used to identify areas of potential agricultural conversion across LPC range.  Total area converted was estimated by selecting areas with at least 90% confidence (b), and 75% confidence (c)."
+           )
+    )
+  )
+)
+```
+
+## Methods
+
+### Satellite Data
+
 ## Including Plots
 
 You can also embed plots, for example:
