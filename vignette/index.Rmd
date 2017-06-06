@@ -20,12 +20,14 @@ data(rus)
 #n <- nrow(rus)
 library(dplyr)
 library(ggplot2)
+library(leaflet)
 library(lme4)
 library(mclogit)
 library(party)
 library(plotly)
 library(pROC)
 library(sensitivity)
+library(shiny)
 library(stringr)
 library(tidyr)
 ```
@@ -48,6 +50,35 @@ In this analysis, we used Google Earth Engine - a platform providing access to t
 3.	Select pixels exceeding reflectance change thresholds
 4.	Distinguish man-made vs. natural changes
 
+
+<div id='map'></div>
+<style>#map {height:180px;}</style>
+<input id='range' class='range' type='range' min='0' max='1.0' step='any')/>
+
+<script>
+  var map = L.map('map', {crs: L.CRS.Simple});
+  var bounds = [[0,0], [100, 200]];
+  L.imageOverlay('wind_before.tif', bounds).addTo(map);
+
+  var overlay = L.imageOverlay('wind_after.tif', bounds).addTo(map);
+  var range = document.getElementById('range');
+
+  //function clip() {
+  //  var nw = map.containerPointToLayerPoint([0, 0]),
+  //      se = map.containerPointToLayerPoint(map.getSize()),
+  //      clipX = nw.x + (se.x - nw.x) * range.value;
+
+  //  overlay.getContainer().style.clip = 'rect(' + [nw.y, clipX, se.y, nw.x].join('px,') + 'px)';
+  }
+
+  //range['oninput' in range ? 'oninput' : 'onchange'] = clip;
+  //map.on('move', clip);
+  //map.setView([500, 500], 15);
+
+  //clip();
+</script>
+
+
 ### Data
 
 Oklahoma provides approval dates.  We selected all records approved after Sept. 01, 2015.
@@ -63,10 +94,6 @@ The LPC RWP specifies buffer distances around specific forms of habitat disturba
 http://www.kansasenergy.org/wind_projects.htm
 
 If suitable sentinel data was not available before the well date, we compared aerial imagery from before the well date to the suitable sentinel data after the well date.  If no change was detected...
-
-```{r cars}
-summary(cars)
-```
 
 ## Results
 
@@ -85,25 +112,25 @@ fluidPage(
       p(class = "caption",
         tags$b("Table 1."), " Counts of new oil and ga wells reported by state oil and gas commissions constructed after Spetember 1", tags$sup("st"), "2015, and located within Lesser -rairie-chicken range.")
     )
-  ),
-  fluidRow(
-    div(
-    column(12,
-  DT::datatable(tab,
-                    fillContainer = TRUE,
-                    selection = list(mode = 'single', 
-                                     #selected = which(Bay16$SITE == input$sites), 
-                                     target = 'row'),
-                    colnames = c("Site", "Turbines", "Survey Effort (hr*km2)",
-                                 "Eagle Obs (min)"),
-                  options = list(rownames = FALSE,
-                                 pageLength = nrow(tab),
-                                 dom = 'tip'
-                                 )
-                )%>%
-  DT::formatRound("EFFORT", 2)
-    ))
   )
+#  fluidRow(
+#    div(
+#    column(12,
+#  DT::datatable(tab,
+#                    fillContainer = TRUE,
+#                    selection = list(mode = 'single', 
+                                     #selected = which(Bay16$SITE == input$sites), 
+#                                     target = 'row'),
+#                    colnames = c("Site", "Turbines", "Survey Effort (hr*km2)",
+#                                 "Eagle Obs (min)"),
+#                  options = list(rownames = FALSE,
+#                                 pageLength = nrow(tab),
+#                                 dom = 'tip'
+#                                 )
+#                )%>%
+#  DT::formatRound("EFFORT", 2)
+#    ))
+#  )
 )
 ```
 
@@ -111,7 +138,7 @@ These discrepancies could be caused by errors in recording dates and/or coordina
 
 Applying our change detection algorithm across LPC range identified 179 new well pads that appeared in LPC habitat since delisting, which did not correspond to any coordinates provided by the states (> 500m from any reported location).  The RWP uses a buffer of 200 meters around oil and gas wells to determine the area for which mitigation is needed.  The 178 reported wells we identified create 3,150 acres of potential mitigation area, after excluding areas around wells built in already degraded habitat.  The 179 additional wells we identified - that were not associated with oil and gas commission records - created an additional 5,800 acres of potential mitigation area.  
 
-```{r p1, echo=FALSE, warning=FALSE, error=FALSE}
+```{r p2, echo=FALSE, warning=FALSE, error=FALSE}
 fluidPage(
   fluidRow(),
   fluidRow(
@@ -125,7 +152,7 @@ fluidPage(
 
 In total, we detected 1,070 disturbances due to energy development within LPC range since the species was delisted, creating 138,689 acres of potential mitigation area under the RWP (Figure 3).  It is important to note that the thresholds we used to detect well pads and wind turbines were selected to minimize the chance of false positives. Due to this conservative approach, some true disturbances were eliminated from consideration by our algorithms, and the numbers reported represent a minimum amount of disturbance in LPC habitat occurring since delisting.
 
-```{r p1, echo=FALSE, warning=FALSE, error=FALSE}
+```{r p3, echo=FALSE, warning=FALSE, error=FALSE}
 fluidPage(
   fluidRow(),
   fluidRow(
@@ -141,7 +168,7 @@ fluidPage(
 
 In addition to tracking energy development, we wanted to estimate the overall loss of LPC habitat across the species’ range since delisting.  The majority of habitat loss is from conversion of native grass prairie and shrubland to agriculture.  Using annual cropland data from the U.S. Department of Agriculture, we estimate between 85,000 and 184,000 acres of LPC habitat was converted to agriculture from 2015 to 2016 (Figure 4).  The range of estimated acreage is based on different level of confidence in the classification USDA assigns to each pixel.  The lower value of 85,000 acres was calculated only from areas with > 90% confidence that LPC habitat in 2015 was converted to agriculture in 2016.   Lowering this confidence threshold to 75% produces an estimated 184,000 acres converted.  We cross-validated these estimates against a calculation using the maximum, and variation in greenness over the course of the growing season.  Using this approach, an estimate with 75% confidence indicated 184,000 acres were converted.
 
-```{r p1, echo=FALSE, warning=FALSE, error=FALSE}
+```{r p4, echo=FALSE, warning=FALSE, error=FALSE}
 fluidPage(
   fluidRow(),
   fluidRow(
@@ -163,56 +190,9 @@ fluidPage(
 You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE}
-plot_ly()%>%
-  add_trace(data = new2, x = ~ (NDVI_max), y = ~ NDVI_var, color = ~ Class, type = "scatter", mode = "markers", text = ~paste(feat, count), hoverinfo = text)%>%
-add_trace(x = ~c(0.2, 0.8), y = ~c(0.15, 0), type = 'scatter', mode = 'lines')
 
-plot_ly(data = ndvi_raw[ndvi_raw$Class == 2 & ndvi_raw$NDVI_count > 4,], x = ~(NDVI_max)*(NDVI_count+1)/NDVI_count, type = "histogram")
-
-plot_ly(data = new2, x = ~ (NDVI_max), y = ~ NDVI_disp, color = ~ Class, type = "scatter", mode = "markers", text = ~paste(feat, count), hoverinfo = text)
-
-plot_ly(data = ndvi_raw[ndvi_raw$Class == 1 & ndvi_raw$NDVI_count > 5,], x = ~(NDVI_max), type = "histogram")
-
-hist(ndvi_raw$disp[ndvi_raw$Class == 2 & ndvi_raw$NDVI_count > 5 & ndvi_raw$feat %in% tier2], freq = FALSE, breaks = 50)
-
-hist(ndvi_raw$NDVI_max[ndvi_raw$Class == 1 & ndvi_raw$NDVI_count > 5], freq = FALSE, breaks = 50)
-
-
-
-curve(dinvgamma(x, fit1var$estimate[1], fit1var$estimate[2]), from = 0.001, to = 0.05, lwd = 2, add = TRUE)
-
-dist23var <- curve(dinvgamma(x, 2.75, 0.07), from = 0.001, to = 0.2, add = TRUE, lwd = 2)
-
-plot(density(rgamma(5000, fit1var$estimate[1], fit1var$estimate[2]) - rgamma(5000, fit22var$estimate[1], fit22var$estimate[2])))
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
-dgev <- function(x, loc, scl, shp){
-  t <- if(shp != 0){
-    (1+(shp*((x-loc)/scl)))^(-1/shp)
-    }else{
-    exp(-(x-loc)/scl)
-    }
-  d <- (1/scl)*(t^(shp+1))*exp(-t)
-  return(d)
-}
 
-pgev <- function(q, loc, scl, shp){
-  t <- if(shp != 0){
-    (1+(shp*((x-loc)/scl)))^(-1/shp)
-    }else{
-    exp(-(x-loc)/scl)
-    }
-  p <- exp(-t)   
-}
-
-dinvgamma <- function(x, a, b){
- d <- (b^a)/gamma(a)*(x^(-a-1))*exp(-b/x)
- return(d)
-}
-
-pinvgamma <- function(q, a, b){
- p <- pscl::pigamma(q, a, b)
- return(p)
-}

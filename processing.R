@@ -373,3 +373,32 @@ max((sum(d2[d2[,1] > val, 2]))*(1-sum(d1[d1[,1] > val, 2])),
      (sum(d4[d4[,1] > val, 2]))*(1-sum(d1[d1[,1] > val, 2])),
      (sum(d5[d5[,1] > val, 2]))*(1-sum(d1[d1[,1] > val, 2])))
 }
+
+dgev <- function(x, loc, scl, shp){
+  t <- if(shp != 0){
+    (1+(shp*((x-loc)/scl)))^(-1/shp)
+  }else{
+    exp(-(x-loc)/scl)
+  }
+  d <- (1/scl)*(t^(shp+1))*exp(-t)
+  return(d)
+}
+
+pgev <- function(q, loc, scl, shp){
+  t <- if(shp != 0){
+    (1+(shp*((x-loc)/scl)))^(-1/shp)
+  }else{
+    exp(-(x-loc)/scl)
+  }
+  p <- exp(-t)   
+}
+
+dinvgamma <- function(x, a, b){
+  d <- (b^a)/gamma(a)*(x^(-a-1))*exp(-b/x)
+  return(d)
+}
+
+pinvgamma <- function(q, a, b){
+  p <- pscl::pigamma(q, a, b)
+  return(p)
+}
