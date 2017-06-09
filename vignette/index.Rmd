@@ -50,33 +50,12 @@ In this analysis, we used Google Earth Engine - a platform providing access to t
 3.	Select pixels exceeding reflectance change thresholds
 4.	Distinguish man-made vs. natural changes
 
-
-<div id='map'></div>
-<style>#map {height:180px;}</style>
-<input id='range' class='range' type='range' min='0' max='1.0' step='any')/>
-
-<script>
-  var map = L.map('map', {crs: L.CRS.Simple});
-  var bounds = [[0,0], [100, 200]];
-  L.imageOverlay('wind_before.tif', bounds).addTo(map);
-
-  var overlay = L.imageOverlay('wind_after.tif', bounds).addTo(map);
-  var range = document.getElementById('range');
-
-  //function clip() {
-  //  var nw = map.containerPointToLayerPoint([0, 0]),
-  //      se = map.containerPointToLayerPoint(map.getSize()),
-  //      clipX = nw.x + (se.x - nw.x) * range.value;
-
-  //  overlay.getContainer().style.clip = 'rect(' + [nw.y, clipX, se.y, nw.x].join('px,') + 'px)';
-  }
-
-  //range['oninput' in range ? 'oninput' : 'onchange'] = clip;
-  //map.on('move', clip);
-  //map.setView([500, 500], 15);
-
-  //clip();
-</script>
+<div class = "juxtapose" data-startingposition = "25%">
+  <img src = "wind_after.png" data-label = "Change Detected"/>
+  <img src = "wind_before.png" data-label = "Before"/>
+</div>
+<script src="https://cdn.knightlab.com/libs/juxtapose/latest/js/juxtapose.min.js"></script>
+<link rel="stylesheet" href="https://cdn.knightlab.com/libs/juxtapose/latest/css/juxtapose.css">
 
 
 ### Data
