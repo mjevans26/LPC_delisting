@@ -54,8 +54,7 @@ In this analysis, we used Google Earth Engine - a platform providing access to t
   <img src = "wind_after.png" data-label = "Change Detected"/>
   <img src = "wind_before.png" data-label = "Before"/>
 </div>
-<script src="https://cdn.knightlab.com/libs/juxtapose/latest/js/juxtapose.min.js"></script>
-<link rel="stylesheet" href="https://cdn.knightlab.com/libs/juxtapose/latest/css/juxtapose.css">
+
 
 
 ### Data
@@ -115,7 +114,15 @@ fluidPage(
 
 These discrepancies could be caused by errors in recording dates and/or coordinates, unreported changes in project timelines, or in many cases, vague constructions dates.  For instance, New Mexico reports a ‘Spud date,’ the date on which ground was broken when drilling a new well.  Kansas provides a ‘Year Start’ with well records, which leaves the actual date at which a new well is constructed ambiguous.  We confirmed the construction of new wells at 92% of reported locations that were checked in New Mexico, but only 28% of those in Kansas.
 
-Applying our change detection algorithm across LPC range identified 179 new well pads that appeared in LPC habitat since delisting, which did not correspond to any coordinates provided by the states (> 500m from any reported location).  The RWP uses a buffer of 200 meters around oil and gas wells to determine the area for which mitigation is needed.  The 178 reported wells we identified create 3,150 acres of potential mitigation area, after excluding areas around wells built in already degraded habitat.  The 179 additional wells we identified - that were not associated with oil and gas commission records - created an additional 5,800 acres of potential mitigation area.  
+Applying our change detection algorithm across LPC range identified 179 new well pads that appeared in LPC habitat since delisting, which did not correspond to any coordinates provided by the states (> 500m from any reported location).  The RWP uses a buffer of 200 meters around oil and gas wells to determine the area for which mitigation is needed.  The 178 reported wells we identified create 3,150 acres of potential mitigation area, after excluding areas around wells built in already degraded habitat.  The 179 additional wells we identified - that were not associated with oil and gas commission records - created an additional 5,800 acres of potential mitigation area. 
+
+<div class = "juxtapose" data-startingposition = "25%">
+  <img src = "oil_after.png" data-label = "Change Detected"/>
+  <img src = "oil_before.png" data-label = "Before"/>
+</div>
+<script src="https://cdn.knightlab.com/libs/juxtapose/latest/js/juxtapose.min.js"></script>
+<link rel="stylesheet" href="https://cdn.knightlab.com/libs/juxtapose/latest/css/juxtapose.css">
+
 
 ```{r p2, echo=FALSE, warning=FALSE, error=FALSE}
 fluidPage(
@@ -162,16 +169,63 @@ fluidPage(
 
 ## Methods
 
-### Satellite Data
+### Change Detection
+For automated change detection, we used pre-processed Sentinel-2 satellite imagery, available on Google Earth Engine, to conduct change detection analyses.  Sentinel-2 is a remote sensing satellite system deployed and maintained by the European Union, providing global coverage of 10m resolution imagery every 12 days.  Sentinel-2 images contain 12 bands recording reflectance values in the visible, near infrared, short-wave infrared, and near ultraviolet spectra.  To avoid the potential for seasonal phenology to confound true land cover change, we first selected Sentinel-2 scenes across LPC range acquired outside of the growing season (November to March).  Scenes collected in 2015/16 were used as ‘before’ imagery and those in 2016/17 as ‘after’.  We removed cloudy pixels from each image using a filter on the provided quality assurance band, which identifies clouds, shadow, snow, and water, and created a single image composite by selecting the median value of each pixel stack.
 
-## Including Plots
+Our automated change detection algorithm extended methodology used by the U.S Geological Survey to produce the National Land Cover Dataset (NLCD) land cover change data .  We calculated four spectral change metrics between before and after imagery.  The Change Vector (CV) measures the total change in reflectance values between two images across the visible and infrared spectrum, and Relative CV Maximum (RCVMAX) measure the total of changes in each band scaled to their global maxima.  Differences in Normalized Difference Vegetation Index (dNDVI) uses ratios between near infrared and red reflectance to indicate changes in the concentration of vegetation.  We additionally calculated differences in a Ratio Normalized Difference Soil Index (dRNDSI) , which uses ratios between short-wave infrared and green reflectance to indicate changes in the concentration of bare ground.  Pixel values for each change metric were converted to z-scores representing the likelihood of land cover change relative to global means for normalized indices (RNDSI & NDVI), and global minimums for scaled indices (CV and RCVMAX).  The output was a four-band image consisting of the standardized z-scores for each change metric at each pixel, covering the entire LPC range.  All calculations and transformations were performed in Google Earth Engine.
 
-You can also embed plots, for example:
+### Change Validation
 
-```{r pressure, echo=FALSE}
+Due to the distinct spatial pattern of wind farms (Figure 1d), we identified new farms by examining the change metric output visualized to highlight losses in vegetation and increases in bare ground.  We then visually inspected the most recent available Sentinel-2 imagery at new wind farm locations to identify and mark individual turbines.  Oil and gas well pads are small and less distinct.  Therefore, we defined change metric thresholds that identified replacement of natural land cover with well pads.  We selected a set of 100 validation plots from the change metric image in areas with high change likelihoods that did (true positive) and did not (false positive) correspond to the addition of well pads.  We extracted the change metric z-scores within these validation plots, and performed linear discriminant analysis (LDA) to estimate the coefficients for a linear transformation maximizing differentiation between true and false positive validation data.  We used a receiver operating characteristic (ROC) curve and selected the LDA score maximizing the second derivative (i.e., rate of change in curve slope) of the relationship between false positive and detection rate (Figure 4a), as a threshold for automatically identifying new well pads. We then converted areas meeting or exceeding this threshold to change polygons.  LDA and ROC analyses were conducted in R using the pscl and pROC packages.
 
+```{r p5, echo=FALSE, warning=FALSE, error=FALSE}
+fluidPage(
+  fluidRow(
+    subplot(change_plot, shape_plot, nrows = 1, shareX = TRUE, shareY = TRUE)
+  ),
+  fluidRow(
+    column(12,
+           p(class = 'caption',
+             tags$b("Figure 4."), " Receiver operating characterstic (ROC) curves plotting linear discriminant analysis scores for (a) change metrics and (b) shape metrics used to identify new drilling pads.  The values at which the rate of increase in detection rate relative to fals epositive rate decreases most rapidly (indicated by arrows) were selected as threshold values."
+           )
+    )
+  )
+)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
+We then needed to discriminate between natural land cover changes that matched well pad spectral characteristics, and true human disturbances.  We calculated a suite of shape metrics for each land cover change polygon, including convexivity, circularity, elongation, and compactness, that had the potential to delineate more regular, compact shapes formed by human activity from irregular shapes associated with natural land cover change .  We then manually classified a validation set of 400 polygons, and as with reflectance thresholds, used LDA and ROC curves to identify values discriminating between true and false positives (Figure 4b).  We then examined the most recent Sentinel-2 imagery at each polygon meeting spectral and shape criteria to confirm the presence of a well pad constructed after September 1st, 2015, and deleting all other polygons.  For each choice of threshold, the true positive detection rate was less than one, and therefore this approach eliminated a small set of true human disturbances.  Thus, the results reported represent a lower bound for the minimum number of new pads.
+
+### Mitigation Area
+
+We further restricted the set of oil and well pads to those occurring within areas identified as shrub/scrub, or grassland by the NLCD 2011 classifications.  This eliminated disturbances occurring within already degraded habitat (i.e. agriculture) from further consideration.  The RWP requires a buffer distance of 200 m around oil and gas wells, and 667 m around wind turbines to determine disturbed acreage that must be offset by habitat mitigation.  To estimate lost potential mitigation opportunities, we buffered the new well pad polygons and turbine locations by their respective distances.  We then eliminated buffered areas within which disturbances were already present (Figure 5a), as these could have potentially already been mitigated, or constitute degraded habitat, and thus be subject to discounted mitigation acreage .  Estimated potential mitigation acreage was calculated as the total acreage of all remaining buffered areas.
+
+### Agriculture Conversion
+To detect conversion of LPC habitat to agriculture, we used Lansat-8 orthorectified top-of-atmosphere reflectance imagery, available on Google Earth Engine.  Landsat-8 is a remote sensing satellite system deployed and maintained by the U.S. Geological Survey, providing global coverage of 30m resolution imagery every 16 days.  To calculate changes in greenness over the course of the growing season, we selected Landsat-8 scenes across LPC range acquired between April and October.  We defined scenes collected in the growing season of 2015 as ‘before’ conditions, and those collected in 2016 as ‘after’ conditions.  We removed cloudy pixels from each image using using the Fmask  algorithm, which calculates the probability that a pixel is a cloud, shadow, or snow.  We excluded pixels with a probability > 0.2.
+
+We used two approaches to estimate the area of LPC habitat converted to agricultural land since the species was delisted.  For both approaches, we considered the growing season (May 01 – September 01) of 2015 to represent ‘before’ conditions, and the growing season of 2016 as ‘after’ conditions.  Our first approach followed similar methodology to a previous study of habitat loss , and used the U.S Department of Agriculture’s annual Cropland Data Layer (CDL).  This product classifies agricultural land by crop type across the United States, using a combination of satellite reflectance, elevation, and ground-truthing data .  The product is a 30m resolution raster whose pixels have a ‘cropland’ value designating crop type, and an assignment confidence score [0, 1].  To estimate LPC habitat conversion to agriculture, we selected pixels classified as either scrubland or grassland in the 2015 CDL, and as any crop type in the 2016 CDL.  We performed this calculation using two different confidence thresholds, excluding pixels with < 75% assignment confidence, and excluding pixels with < 90% confidence.  We applied two successive majority filters to each result to eliminate single, isolated pixels creating more contiguous areas of change or non-change.  Areas representing change were then converted to polygons.  Finally, due to the concave and patchy nature of the per-pixel output, we created minimum-area bounding boxes around each polygon, which more accurately represent the footprint of an agricultural parcel.  The sum area of all resulting polygons was used as the first estimate of habitat loss.
+
+Our second approach used measures of intra-annual variation in greenness, as indicated by NDVI.  We calculated NDVI across LPC range using Landsat-8 30m resolution images obtained between April 30th and September 1st in 2015 (before) and 2016 (after).  For each year, we calculated the dispersion (sample variance normalized by sample mean) and maximum NDVI value across images at each pixel.  Our expectation was that agricultural land cover would have both greater variance, and maximum NDVI values over the course of a growing season than natural landcover. Thus, conversion from LPC habitat to agriculture would be indicated by an increase in both values from 2015 to 2016.  To estimate the likelihood of conversion, we calculated the difference between NDVI dispersion and maxima between the two years.  
+
+Small sample size can bias estimates of dispersion.  Therefore, we adjusted observed NDVI metrics by a measure of uncertainty based on the number of images available at a pixel location.  The probability of true population variance (σ2) given a sample variance (s2) and sample size (n) can be estimated by an Inverse Gamma distribution: P(σ2 | s2, n) ~ IG(n/2, (n-1)*s2/2).  We used the ratio of the probability density for the observed sample variance from a distribution parameterized by the actual sample size, to one parameterized by the maximum possible sample size, as an adjustment factor for observed dispersion.  The adjustment factor (AF) for observed dispersion at a given pixel i was:
+
+We adjusted all NDVI dispersion values by the adjustment factors per pixel, using the maximum number of images available within the growing season (16) as n_max.
+To identify thresholds representing true conversion of LPC habitat to agriculture, we generated distributions for expected differences in NDVI dispersion and max between habitat and agricultural land cover types.  We took a random sample of NDVI dispersion, maximum, and image count values at 50,000 pixels where image count was at least 6.  We used the CDL to further restrict this sampling to pixels with an assignment confidence of at least 90%, and extracted the ‘cropland’ attribute.  This created a dataset of NDVI dispersion and max values for each crop and landcover type.  From this data, we generated probability distributions for the expected change in NDVI dispersion and maxima corresponding to conversion between all combinations of shrub/grassland, alfalfa, corn, wheat, sorghum, and fallow land cover types by iteratively calculating the difference between 5,000 random samples drawn from the observed distributions for each crop and habitat category (Figure 7).  We calculated the densities across values, and standardized to sum to 1.  From these distributions, we calculated the cumulative probability that an observed change in NDVI dispersion and max corresponded to land cover change from LPC habitat to agriculture.
+
+```{r p6, echo=FALSE, warning=FALSE, error=FALSE}
+fluidPage(
+  fluidRow(
+    subplot(change_plot, shape_plot, nrows = 1, shareX = TRUE, shareY = TRUE)
+  ),
+  fluidRow(
+    column(12,
+           p(class = 'caption',
+             tags$b("Figure 6."), " Probability distributions for expected change sin NDVI dispersion and maxima if land is converted from Lesser prairie chicken habitat to different crop types.  Curves represent the frequency of expected values (a, b) and probability of observing a change value (c, d) for each form of conversion.  Curves were used to select threshold change values, indicated by grey arrows, identifying when conversion occurred between growing seasons of 2015 and 2016, with 75 and 90% confidence."
+           )
+    )
+  )
+)
+```
+
+We estimated the probability of conversion as the sum of the probabilities of the observed change value given conversion to each agricultural class – defined by the inverse of the cumulative distributions of expected differences for each crop type – multiplied by the probability of the observed change value given no change – defined as the cumulative distribution of expected differences for habitat unchanged habitat.  To detect conversion to fallow land we used the cumulative distribution of expected differences for change from habitat to fallow, and the inverse cumulative distribution for unchanged habitat.
 
