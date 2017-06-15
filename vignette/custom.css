@@ -118,3 +118,13 @@ a {
 .tocify-item .list-group-item:not(:active) {
   background-color: #ffcc00;
 }
+
+.datatables.html-widget.html-widget-static-bound {
+  width: 100% !important;
+  height: auto;
+}
+
+table {
+  width: 100% !important;
+  height: auto;
+}

@@ -85,7 +85,19 @@ ldahist(data = scrub_pred$x[,1], g = scrub_pred$class)
 scrub_out <- data.frame("predict" = scrub_pred$class, "LD1" = scrub_pred$x[,1], "p0" = scrub_pred$posterior[,1], "p1" = scrub_pred$posterior[,2], "observed" = rawcd$Index)
 scrub_out$predict <- as.numeric(as.character(scrub_out$predict))
 scrub_roc <- roc(response = scrub_out$observed, predictor = scrub_out$LD1)
-change_plot <- plot_ly(data = as.data.frame(scrub_roc[2:4]), y = ~sensitivities, x = ~ 1-specificities, type = "scatter", text = ~paste("Thresh:", thresholds), hoverinfo = text)
+
+change_plot <- plot_ly(data = as.data.frame(scrub_roc[2:4]),
+                       y = ~sensitivities, x = ~ 1-specificities,
+                       type = "scatter", mode = "lines", name = "Change metrics",
+                       line = list(width = 3),
+                       text = ~paste("LDA score:", round(thresholds, 3)), hoverinfo = text)%>%
+  add_trace(data = as.data.frame(shape_roc[2:4]),
+            y = ~sensitivities, x = ~ 1 - specificities,
+            type = "scatter", mode = "lines", name = "Shape metrics",
+            line = list(width = 3),
+            text = ~paste("LDA score:", round(thresholds, 3)), hoverinfo = text)%>%
+  layout(xaxis = list(title = "False Positive Rate"),
+         yaxis = list(title = "True Positive Rate"))
 
 N <- lda(Index ~ cv_z + rcv_z + ndvi_z + ndsi_z, data = rawcdN)
 N_pred <- predict(N, type = "prob")
@@ -93,7 +105,14 @@ ldahist(data = N_pred$x[,1], g = N_pred$class)
 N_out <- data.frame("predict" = N_pred$class, "LD1" = N_pred$x[,1], "p0" = N_pred$posterior[,1], "p1" = N_pred$posterior[,2], "observed" = rawcdN$Index)
 N_out$predict <- as.numeric(as.character(N_out$predict))
 N_roc <- roc(response = N_out$observed, predictor = N_out$LD1)
-shape_plot <- plot_ly(data = as.data.frame(shape_roc[2:4]), y = ~sensitivities, x = ~ 1 - specificities, type = "scatter", text = ~paste("Thresh:", thresholds), hoverinfo = text)
+
+shape_plot <- plot_ly(data = as.data.frame(shape_roc[2:4]),
+                      y = ~sensitivities, x = ~ 1 - specificities,
+                      type = "scatter", mode = "markers",
+                      text = ~paste("Thresh:", thresholds), hoverinfo = text)%>%
+  layout(title = "b) Shape Metrics",
+         xaxis = list(title = "False Positive Rate"),
+         yaxis = list(title = "True Positive Rate"))
 
 LSag <- read.csv(file = "KS_ag_raw.csv", header = TRUE)
 LSag$ID <- as.character(LSag$ID)
@@ -294,70 +313,72 @@ dvar_ag_crp <- distdiff(sample(ndvi_raw$NDVI_disp[ndvi_raw$cropland == 152
 
 
 p3<-plot_ly(type = "scatter", mode = "lines")%>%
-  add_trace(x = ~d_crp_crp[,1], y = ~cumsum(d_crp_crp[,2]), line = list(color = "black"),
-            name = "crop")%>%
-  add_trace(x = ~d_hab_hab[,1], y = ~d_hab_hab[,2]/max(d_hab_hab[,2])*0.5, line = list(color = "black"),
-            name = "hab")%>%
+  #add_trace(x = ~d_crp_crp[,1], y = ~cumsum(d_crp_crp[,2]), line = list(color = "black"),
+            #name = "crop", showlegend = F)%>%
+  add_trace(x = ~d_hab_hab[,1], y = ~d_hab_hab[,2]/max(d_hab_hab[,2])*0.5,
+            line = list(color = "black", dash = "dash"),
+            name = "hab", showlegend = F)%>%
   add_trace(x = ~d_hab_corn[,1], y = ~1-cumsum(d_hab_corn[,2]), line = list(color = "yellow"),
-            name = 'corn')%>%
+            name = 'corn', showlegend = F)%>%
   add_trace(x = ~d_hab_wheat[,1], y = ~1-cumsum(d_hab_wheat[,2]), line = list(color = "brown"),
-            name = 'wheat')%>%
+            name = 'wheat', showlegend = F)%>%
   add_trace(x = ~d_hab_bare[,1], y = ~cumsum(d_hab_bare[,2]), line = list(color = "grey"),
-            name = 'bare')%>%
+            name = 'bare', showlegend = F)%>%
   add_trace(x = ~d_hab_alph[,1], y = ~1-cumsum(d_hab_alph[,2]), line = list(color = "green"),
-            name = 'alphalpha')%>%
+            name = 'alphalpha', showlegend = F)%>%
   add_trace(x = ~d_hab_gum[,1], y = ~1-cumsum(d_hab_gum[,2]), line = list(color = "purple"),
-            name = 'sorghum')
+            name = 'sorghum', showlegend = F)
 
 p4<-plot_ly(type = "scatter", mode = "lines")%>%
-  add_trace(x = ~dvar_crp_crp[,1], y = ~cumsum(dvar_crp_crp[,2]), line = list(color = "black"),
-            name = "crop")%>%
-  add_trace(x = ~dvar_hab_hab[,1], y = ~dvar_hab_hab[,2]/max(dvar_hab_hab[,2])*0.5, line = list(color = "black"),
-            name = "hab")%>%
+  #add_trace(x = ~dvar_crp_crp[,1], y = ~cumsum(dvar_crp_crp[,2]), line = list(color = "black"),
+            #name = "crop")%>%
+  add_trace(x = ~dvar_hab_hab[,1], y = ~dvar_hab_hab[,2]/max(dvar_hab_hab[,2])*0.5,
+            line = list(color = "black", dash = "dash"),
+            name = "Habitat")%>%
   add_trace(x = ~dvar_hab_corn[,1], y = ~1-cumsum(dvar_hab_corn[,2]), line = list(color = "yellow"),
-            name = 'corn')%>%
+            name = 'Corn')%>%
   add_trace(x = ~dvar_hab_wheat[,1], y = ~1-cumsum(dvar_hab_wheat[,2]), line = list(color = "brown"),
-            name = 'wheat')%>%
+            name = 'Wheat')%>%
   add_trace(x = ~dvar_hab_bare[,1], y = ~cumsum(dvar_hab_bare[,2]), line = list(color = "grey"),
-            name = 'bare')%>%
+            name = 'Bare')%>%
   add_trace(x = ~dvar_hab_alph[,1], y = ~1-cumsum(dvar_hab_alph[,2]), line = list(color = "green"),
-            name = 'alphalpha')%>%
+            name = 'Alfalfa')%>%
   add_trace(x = ~dvar_hab_gum[,1], y = ~1-cumsum(dvar_hab_gum[,2]),line = list(color = "purple"),
-            name = 'sorghum')
+            name = 'Sorghum')
 
 p5<-plot_ly(type = "scatter", mode = "lines")%>%
-  add_trace(x = ~d_crp_crp[,1], y = ~d_crp_crp[,2], line = list(color = "black"),
-            name = "crop")%>%
-  add_trace(x = ~d_hab_hab[,1], y = ~d_hab_hab[,2], line = list(color = "black"),
-            name = "hab")%>%
+  #add_trace(x = ~d_crp_crp[,1], y = ~d_crp_crp[,2], line = list(color = "black"),
+            #name = "crop", showlegend = F)%>%
+  add_trace(x = ~d_hab_hab[,1], y = ~d_hab_hab[,2], line = list(color = "black", dash = "dash"),
+            name = "hab", showlegend = F)%>%
   add_trace(x = ~d_hab_corn[,1], y = ~d_hab_corn[,2], line = list(color = "yellow"),
-            name = 'corn')%>%
+            name = 'corn', showlegend = F)%>%
   add_trace(x = ~d_hab_wheat[,1], y = ~d_hab_wheat[,2], line = list(color = "brown"),
-            name = 'wheat')%>%
+            name = 'wheat', showlegend = F)%>%
   add_trace(x = ~d_hab_bare[,1], y = ~d_hab_bare[,2], line = list(color = "grey"),
-            name = 'bare')%>%
+            name = 'bare', showlegend = F)%>%
   add_trace(x = ~d_hab_alph[,1], y = ~d_hab_alph[,2], line = list(color = "green"),
-            name = 'alphalpha')%>%
+            name = 'alphalpha', showlegend = F)%>%
   add_trace(x = ~d_hab_gum[,1], y = ~d_hab_gum[,2], line = list(color = "purple"),
-            name = 'sorghum')
+            name = 'sorghum', showlegend = F)
 
 p6<-plot_ly(type = "scatter", mode = "lines")%>%
-  add_trace(x = ~dvar_crp_crp[,1], y = ~dvar_crp_crp[,2], line = list(color = "black"),
-            name = "crop")%>%
-  add_trace(x = ~dvar_hab_hab[,1], y = ~dvar_hab_hab[,2], line = list(color = "black"),
-            name = "hab")%>%
+  #add_trace(x = ~dvar_crp_crp[,1], y = ~dvar_crp_crp[,2], line = list(color = "black"),
+            #name = "crop", showlegend = F)%>%
+  add_trace(x = ~dvar_hab_hab[,1], y = ~dvar_hab_hab[,2], line = list(color = "black", dash = "dash"),
+            name = "hab", showlegend = F)%>%
   add_trace(x = ~dvar_hab_corn[,1], y = ~dvar_hab_corn[,2], line = list(color = "yellow"),
-            name = 'corn')%>%
+            name = 'corn', showlegend = F)%>%
   add_trace(x = ~dvar_hab_wheat[,1], y = ~dvar_hab_wheat[,2], line = list(color = "brown"),
-            name = 'wheat')%>%
+            name = 'wheat', showlegend = F)%>%
   add_trace(x = ~dvar_hab_bare[,1], y = ~dvar_hab_bare[,2], line = list(color = "grey"),
-            name = 'bare')%>%
+            name = 'bare', showlegend = F)%>%
   add_trace(x = ~dvar_hab_alph[,1], y = ~dvar_hab_alph[,2], line = list(color = "green"),
-            name = 'alphalpha')%>%
+            name = 'alphalpha', showlegend = F)%>%
   add_trace(x = ~dvar_hab_gum[,1], y = ~dvar_hab_gum[,2],line = list(color = "purple"),
-            name = 'sorghum')
+            name = 'sorghum', showlegend = F)
 
-subplot(p3, p4, nrows = 2)
+subplot(p5, p6, nrows = 2)
 
 distdiff2 <-function(d1, d2){
   v <- d1-d2
