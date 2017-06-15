@@ -137,7 +137,7 @@ fluidPage(
   fluidRow(
     column(12,
            p(class = 'caption',
-             tags$b("Figure 2."), "Exapmle of well drilling pads constructed after September 1", tags$sup("st"), ", 2015 identified by automated land cover change detection.  Use the slider to reveal new pads detectable only using satellite remote sensing data.")
+             tags$b("Figure 2."), "Example of well drilling pads constructed after September 1", tags$sup("st"), ", 2015 identified by automated land cover change detection.  Use the slider to reveal new pads detectable only using satellite remote sensing data.")
     )
   )
 )
@@ -173,7 +173,7 @@ fluidPage(
   tags$img(src="ag_conversion.png", class="figure-img img-fluid rounded", alt="Well pad buffer")
            ),
       p(class = 'caption',
-        tags$b("Figure 3."), " Conversion of Lesser prairie-chicken habitat to agriculture between 2015 and 2016.")
+        tags$b("Figure 4."), " Estimated areas of Lesser prairie-chicken habitat converted to agriculture between 2015 and 2016.")
     )
   )
 )
@@ -220,7 +220,7 @@ fluidPage(
   fluidRow(
     column(12,
            p(class = 'caption',
-             tags$b("Figure 4."), " Receiver operating characterstic (ROC) curves plotting linear discriminant analysis scores for change metrics and shape metrics used to identify new drilling pads.  The values at which the rate of increase in detection rate relative to the false positive rate decreases most rapidly (indicated by arrows) were selected as threshold values."
+             tags$b("Figure 5."), " Receiver operating characterstic (ROC) curves plotting linear discriminant analysis scores for change metrics and shape metrics used to identify new drilling pads.  The values at which the rate of increase in detection rate relative to the false positive rate decreases most rapidly (indicated by arrows) were selected as threshold values."
            )
     )
   )
@@ -228,11 +228,11 @@ fluidPage(
 ```
 
 
-We then needed to discriminate between natural land cover changes that matched well pad spectral characteristics, and true human disturbances.  We calculated a suite of shape metrics for each land cover change polygon, including convexivity, circularity, elongation, and compactness, that had the potential to delineate more regular, compact shapes formed by human activity from irregular shapes associated with natural land cover change .  We then manually classified a validation set of 400 polygons, and as with reflectance thresholds, used LDA and ROC curves to identify values discriminating between true and false positives (Figure 4b).  We then examined the most recent Sentinel-2 imagery at each polygon meeting spectral and shape criteria to confirm the presence of a well pad constructed after September 1st, 2015, and deleting all other polygons.  For each choice of threshold, the true positive detection rate was less than one, and therefore this approach eliminated a small set of true human disturbances.  Thus, the results reported represent a lower bound for the minimum number of new pads.
+We then needed to discriminate between natural land cover changes that matched well pad spectral characteristics, and true human disturbances.  We calculated a suite of shape metrics for each land cover change polygon, including convexivity, circularity, elongation, and compactness, that had the potential to delineate more regular, compact shapes formed by human activity from irregular shapes associated with natural land cover change .  We then manually classified a validation set of 400 polygons, and as with reflectance thresholds, used LDA and ROC curves to identify values discriminating between true and false positives (Figure 5).  We then examined the most recent Sentinel-2 imagery at each polygon meeting spectral and shape criteria to confirm the presence of a well pad constructed after September 1st, 2015, and deleting all other polygons.  For each choice of threshold, the true positive detection rate was less than one, and therefore this approach eliminated a small set of true human disturbances.  Thus, the results reported represent a lower bound for the minimum number of new pads.
 
 ### Mitigation Area
 
-We restricted the set of oil and well pads to those occurring within areas identified as shrub/scrub, or grassland by the NLCD 2011 classifications.  This eliminated disturbances occurring within already degraded habitat (i.e. agriculture) from further consideration.  The RWP requires a buffer distance of 200 m around oil and gas wells, and 667 m around wind turbines to determine disturbed acreage that must be offset by habitat mitigation.  To estimate lost potential mitigation opportunities, we buffered the new well pad polygons and turbine locations by their respective distances.  We then eliminated buffered areas within which disturbances were already present (Figure 5a), as these could have potentially already been mitigated, or constitute degraded habitat, and thus be subject to discounted mitigation acreage<sup>6</sup>.  Estimated potential mitigation acreage was calculated as the total acreage of all remaining buffered areas.
+We restricted the set of oil and well pads to those occurring within areas identified as shrub/scrub, or grassland by the NLCD 2011 classifications.  This eliminated disturbances occurring within already degraded habitat (i.e. agriculture) from further consideration.  The RWP requires a buffer distance of 200 m around oil and gas wells, and 667 m around wind turbines to determine disturbed acreage that must be offset by habitat mitigation.  To estimate lost potential mitigation opportunities, we buffered the new well pad polygons and turbine locations by their respective distances.  We then eliminated buffered areas within which disturbances were already present (Figure 6a), as these could have potentially already been mitigated, or constitute degraded habitat, and thus be subject to discounted mitigation acreage<sup>6</sup>.  Estimated potential mitigation acreage was calculated as the total acreage of all remaining buffered areas.
 
 ```{r p7, echo=FALSE, warning=FALSE, error=FALSE}
 fluidPage(
@@ -243,7 +243,7 @@ fluidPage(
   tags$img(src="oil_buffer.png", class="figure-img img-fluid rounded", alt="Well pad buffer")
            ),
       p(class = 'caption',
-        tags$b("Figure 3."), " Buffered areas surrounding oil and gas wells encompassing previously degraded habitat (a) were not included in our calcultion of total acreage.  Only areas containing primarily intact LPC habitat (b) were included.")
+        tags$b("Figure 6."), " Buffered areas surrounding oil and gas wells encompassing previously degraded habitat (a) were not included in our calcultion of total acreage.  Only areas containing primarily intact LPC habitat (b) were included.")
     )
   )
 )
@@ -257,7 +257,7 @@ We used two approaches to estimate the area of LPC habitat converted to agricult
 
 Our second approach used measures of intra-annual variation in greenness, as indicated by NDVI.    We calculated NDVI across LPC range using orthorectified top-of-atmosphere reflectance Landsat-8 30m resolution images obtained between April 30th and September 1st in 2015 (before) and 2016 (after), available on Google Earth Engine.  Landsat-8 is a remote sensing satellite system deployed and maintained by the U.S. Geological Survey, providing global coverage of 30m resolution imagery every 16 days.  We defined scenes collected in the growing season of 2015 as ‘before’ conditions, and those collected in 2016 as ‘after’ conditions.  We removed cloudy pixels from each image using the Fmask<sup>7</sup> algorithm, which calculates the probability that a pixel is a cloud, shadow, or snow.  We excluded pixels with a probability > 0.2.  For each year, we calculated the dispersion (sample variance normalized by sample mean) and maximum NDVI value across images at each pixel.  Our expectation was that agricultural land cover would have both greater variance, and maximum NDVI values over the course of a growing season than natural landcover. Thus, conversion from LPC habitat to agriculture would be indicated by an increase in both values from 2015 to 2016.  To estimate the likelihood of conversion, we calculated the difference between NDVI dispersion and maxima between the two years.  
 
-Small sample size can bias estimates of dispersion.  Therefore, we adjusted observed NDVI metrics by a measure of uncertainty based on the number of images available at a pixel location.  The probability of true population variance (σ<sup>2</sup>) given a sample variance (s<sup>2</sup>) and sample size (n) can be estimated by an Inverse Gamma distribution: P(σ<sup>2</sup> | s<sup>2</sup>, n) ~ IG(n/2, (n-1)*s<sup>2</sup>/2).  We used the ratio of the probability density for the observed sample variance from a distribution parameterized by the actual sample size, to one parameterized by the maximum possible sample size, as an adjustment factor for observed dispersion.  We adjusted all NDVI dispersion values by the adjustment factors per pixel, using the maximum number of images available within the growing season (16) as n_max.
+Small sample size can bias estimates of dispersion.  Therefore, we adjusted observed NDVI metrics by a measure of uncertainty based on the number of images available at a pixel location.  The probability of true population variance (σ<sup>2</sup>) given a sample variance (s<sup>2</sup>) and sample size (n) can be estimated by an Inverse Gamma distribution: P(σ<sup>2</sup> | s<sup>2</sup>, n) ~ IG(n/2, (n-1)*s<sup>2</sup>/2).  We used the ratio of the probability density for the observed sample variance from a distribution parameterized by the actual sample size, to one parameterized by the maximum possible sample size, as an adjustment factor for observed dispersion.  We adjusted all NDVI dispersion values by the adjustment factors per pixel, using the maximum number of images available within the growing season (16) as n<sub>max</sub>.
 
 To identify thresholds representing true conversion of LPC habitat to agriculture, we generated distributions for expected differences in NDVI dispersion and max between habitat and agricultural land cover types.  We took a random sample of NDVI dispersion, maximum, and image count values at 50,000 pixels where image count was at least 6.  We used the CDL to further restrict this sampling to pixels with an assignment confidence of at least 90%, and extracted the ‘cropland’ attribute.  This created a dataset of NDVI dispersion and max values for each crop and landcover type.  From this data, we generated probability distributions for the expected change in NDVI dispersion and maxima corresponding to conversion between all combinations of shrub/grassland, alfalfa, corn, wheat, sorghum, and fallow land cover types by iteratively calculating the difference between 5,000 random samples drawn from the observed distributions for each crop and habitat category (Figure 7).  We calculated the densities across values, and standardized to sum to 1.  From these distributions, we calculated the cumulative probability that an observed change in NDVI dispersion and max corresponded to land cover change from LPC habitat to agriculture.
 
@@ -271,7 +271,7 @@ fluidPage(
   fluidRow(
     column(12,
            p(class = 'caption',
-             tags$b("Figure 6."), " Probability distributions for expected change sin NDVI dispersion and maxima if land is converted from Lesser prairie chicken habitat to different crop types.  Curves represent the frequency of expected values (a, b) and probability of observing a change value (c, d) for each form of conversion.  Curves were used to select threshold change values, indicated by grey arrows, identifying when conversion occurred between growing seasons of 2015 and 2016, with 75 and 90% confidence."
+             tags$b("Figure 7."), " Probability distributions for expected change sin NDVI dispersion and maxima if land is converted from Lesser prairie chicken habitat to different crop types.  Curves represent the frequency of expected values (a, b) and probability of observing a change value (c, d) for each form of conversion.  Curves were used to select threshold change values, indicated by grey arrows, identifying when conversion occurred between growing seasons of 2015 and 2016, with 75 and 90% confidence."
            )
     )
   )

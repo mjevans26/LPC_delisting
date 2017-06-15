@@ -389,10 +389,10 @@ distdiff2 <-function(d1, d2){
 }
 
 auc_diff <- function(d1, d2, d3, d4, d5, val){
-max((sum(d2[d2[,1] > val, 2]))*(1-sum(d1[d1[,1] > val, 2])),
-     (sum(d3[d3[,1] > val, 2]))*(1-sum(d1[d1[,1] > val, 2])),
-     (sum(d4[d4[,1] > val, 2]))*(1-sum(d1[d1[,1] > val, 2])),
-     (sum(d5[d5[,1] > val, 2]))*(1-sum(d1[d1[,1] > val, 2])))
+max(1-sum(d2[d2[,1] < val, 2]), 
+    1-sum(d3[d3[,1] < val, 2]), 
+    1-sum(d4[d4[,1] < val, 2]), 
+    1-sum(d5[d5[,1] < val, 2]))*sum(d1[d1[,1] > val, 2])
 }
 
 dgev <- function(x, loc, scl, shp){
