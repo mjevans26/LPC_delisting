@@ -1,5 +1,5 @@
 ---
-title: "Remote Sensing Lesser Prairie Chicken"
+title: "Monitoring Habitat Loss for Endangered Species Using Satellite Data: A Case Study of the Lesser Prairie-Chicken"
 author: "Defenders of Wildlife"
 date: "`r Sys.Date()`"
 output:
@@ -137,7 +137,7 @@ fluidPage(
   fluidRow(
     column(12,
            p(class = 'caption',
-             tags$b("Figure 2."), "Example of well drilling pads identified by our change detection algorithm applied to satellite images..  Use the slider to see the well pads constructed between September 1, 2015 and April 1, 2017 displayed over imagery from before September 1, 2015.")
+             tags$b("Figure 2."), "Example of well drilling pads identified by our change detection algorithm applied to satellite images.  Use the slider to see the well pads constructed between September 1, 2015 and April 1, 2017 displayed over imagery from before September 1, 2015.")
     )
   )
 )
