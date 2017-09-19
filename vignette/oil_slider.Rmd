@@ -1,0 +1,6 @@
+<div id="oilpad-slider" class = "juxtapose" data-startingposition = "30%">
+  <img src = "images/oil_after.png" data-label = "After 9/1/15"/>
+  <img src = "images/oil_before.png" data-label = "Before 9/1/15"/>
+</div>
+<script src="https://cdn.knightlab.com/libs/juxtapose/latest/js/juxtapose.min.js"></script>
+<link rel="stylesheet" href="https://cdn.knightlab.com/libs/juxtapose/latest/css/juxtapose.css">

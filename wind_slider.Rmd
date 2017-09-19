@@ -1,0 +1,15 @@
+<div class = "juxtapose" data-startingposition = "25%">
+  <img src = "images/wind_change.png" data-label = "After 9/1/15"/>
+  <img src = "images/wind_before.png" data-label = "Before 9/1/15"/>
+</div>
+
+<figure class="figure">
+  <img src="images/change_key.png" class="figure-img img-fluid rounded" alt="Change Legend", margin="auto">
+</figure>
+
+<div class = "juxtapose" data-startingposition = "25%">
+  <img src = "images/wind_after.png" data-label = "After 9/1/15"/>
+  <img src = "images/wind_before.png" data-label = "Before 9/1/15"/>
+</div>
+<script src="https://cdn.knightlab.com/libs/juxtapose/latest/js/juxtapose.min.js"></script>
+<link rel="stylesheet" href="https://cdn.knightlab.com/libs/juxtapose/latest/css/juxtapose.css">

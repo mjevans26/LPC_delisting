@@ -1,0 +1,163 @@
+---
+title: "ACD Methods"
+author: "Michael Evans"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    css: custom.css
+    df_print: paged
+    fig_caption: yes
+    fig_width: 7
+    highlight: tango
+    toc: true
+    toc_depth: 3
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Summary
+
+The Center for Conservation Innovation at Defenders of Wildlife has been developing methods to use the increasing abundance of satellite data to advance imperiled species conservation.  We have applied these methods to detect habitat disturbance from energy development and agricultural conversion across the range of the Lesser prairie chicken, and are currently tracking the threat of sand mining to the Dunes sagebrush lizard in west Texas.  The possibilities to use these analytical tools for , and we anticipate applying them in many more contexts.
+
+### Remote Sensing
+
+In this document, the term ‘remote sensing’ describes the use of electromagnetic reflectance from the Earth’s surface, measured by sensors on satellites or airplanes, to quantify patterns of land cover and land use.  A recent proliferation of these data has increased the use of remote sensing in conservation.  Many satellite systems collect new images across the globe bi-weekly, advancing the ability to quickly detect and quantify habitat loss.  Satellite sensors also measure reflectance values beyond the visible light spectrum, including infrared and ultraviolet light.  Compared to photos taken from airplanes (i.e. aerial photos), satellite data often allow users to better distinguish among land cover types and features on the Earth’s surface.  Curently, our work has primarily used three data sources: 
+
+Landsat-8 is a remote sensing satellite system deployed and maintained by the U.S. Geological Survey, providing global coverage of 30-meter resolution imagery every 16 days.  Landsat-8 images contain 12 bands that record reflectance values in the visible (RGB), near infrared, short-wave infrared and near ultraviolet spectra. [^1]  
+
+Sentinel-2 is a remote-sensing satellite system deployed and maintained by the European Union, providing global coverage of 10-meter resolution imagery every 12 days.  Sentinel-2 images contain 12 bands that record reflectance values in the visible, near infrared, short-wave infrared and near ultraviolet spectra. [^2] 
+
+The National Agricultural Imagery Prograp (NAIP) is run by the U.S. Department of Agriculture, and acquires 1-meter resolution aerial imagery during the agricultural growing seasons in the continental U.S.  NAIP imagery contains 4 bands recording reflectance in the visible and near infrared spectra.  Images are collected annually per state, and national coverage occurs in 3 year cycles[^3].
+
+### Automated Change Detection
+We use Google Earth Engine — a platform providing real-time access to terabytes of remote sensing data and the cloud computing capabilities to analyze them — to create a process to automatically detect changes in land use and land cover between two time periods.  The basic process involves the following key steps:
+
+1.	Acquire satellite data from before and after the date of interest.
+2.	Calculate changes in the Earth's surface reflectance values using the data.
+3.	Identify minimum changes in reflectance values that correspond to the habitat loss we want to identify.
+4.	Select pixels exceeding these minimum changes.
+
+<div class = "juxtapose" data-startingposition = "25%">
+  <img src = "images/wind_change.png" data-label = "After 9/1/15"/>
+  <img src = "images/wind_before.png" data-label = "Before 9/1/15"/>
+</div>
+
+<figure class="figure">
+  <img src="images/change_key.png" class="figure-img img-fluid rounded" alt="Change Legend", margin="auto">
+</figure>
+
+<div class = "juxtapose" data-startingposition = "25%">
+  <img src = "images/wind_after.png" data-label = "After 9/1/15"/>
+  <img src = "images/wind_before.png" data-label = "Before 9/1/15"/>
+</div>
+```{r f1, echo=FALSE, warning=FALSE, error=FALSE}
+fluidPage(
+  fluidRow(),
+  fluidRow(
+    column(12,
+           p(class = 'caption',
+             tags$b("Figure 1. The process of automated land cover change detection, illustrated with images at a Texas wind farm constructed after September 2015."), "Use the sliders to see the raw changes in reflectance values calculated between September 1, 2015 an April 1, 2017 (top) and the wind farm footprint that is highlighted after selecting pixels exceeding minimum changes in reflectance (bottom).")
+    )
+  )
+)
+```
+
+All calculations and transformations are performed in Google Earth Engine (code is available in a GitHub repository).  We removed cloudy pixels from each image using a filter on the provided quality assurance band, which identifies clouds, shadow, snow and water, and created a single-image composite by selecting the median value of each pixel stack.  
+
+Our automated change detection algorithm extends the method used by the U.S Geological Survey to produce the National Land Cover Dataset (NLCD) land cover change data[^11].   We calculated four spectral change metrics between before and after imagery:
+
+1. The Change Vector (CV) measures the total change in reflectance values between two images across the visible and infrared spectrum.
+2. Relative CV Maximum (RCV<sub>MAX</sub>) measures the total change in each band scaled to their global maxima.  
+3. Differences in Normalized Difference Vegetation Index (dNDVI) uses ratios between near infrared and red reflectance to indicate changes in the concentration of vegetation.  
+4. Ratio Normalized Difference Soil Index (dRNDSI)[^12] uses ratios between short-wave infrared and green reflectance to indicate changes in the concentration of bare ground.  
+
+We then convert pixel values for each change metric to z-scores representing the likelihood of land cover change relative to global means for normalized indices (RNDSI and NDVI), and global minimums for scaled indices (CV and RCV<sub>MAX</sub>).  The output is a four-band image consisting of the standardized z-scores for each change metric at each pixel.  This standardization transformation on the change image effectivelly eliminates the effects of changes in baseline reflectance values between two images.  
+
+### Change Validation
+
+Often specific changes of interest (such as wind farms) are distinct enough such that they can be identified by the standardized change metric image.  However, in cases where are less distinct visually, or forms of disturbance are not known a priori, steps to increase the sensitivity and specificity of change detection are needed to improve results.  Therefore, we defined thresholds for changes in reflectance that represent replacement of natural land cover with well pads.  To define the thresholds, we evaluated the actual reflectance values from 100 randomly selected plots in areas with high change likelihoods that did (true positive) and did not (false positive) correspond to the presence of new well pads.  We extracted the change metric z-scores within these validation plots, and performed linear discriminant analysis (LDA) to estimate the coefficients for a linear transformation maximizing differentiation between true and false positive validation data.  We used a receiver operating characteristic (ROC) curve and selected the LDA score maximizing the second derivative (i.e., rate of change in curve slope) of the relationship between false positive and detection rate (Figure 6a), as a threshold for automatically identifying new well pads. We then converted areas meeting or exceeding this threshold to change polygons.  LDA and ROC analyses were conducted in R using the *pscl* and *pROC* packages (code available upon request).
+
+```{r f6, echo=FALSE, warning=FALSE, error=FALSE}
+fluidPage(
+  fluidRow(
+        plot_ly(data = as.data.frame(scrub_roc[2:4]),
+                       y = ~sensitivities, x = ~ 1-specificities,
+                       type = "scatter", mode = "lines", name = "Change metrics",
+                       line = list(width = 3),
+                       text = ~paste("LDA score:", round(thresholds, 3),
+                                     "<br>True positive:", round(sensitivities, 2),
+                                     "<br>False positive:", round(1-specificities, 2)), 
+                hoverinfo = "text")%>%
+  add_trace(data = as.data.frame(shape_roc[2:4]),
+            y = ~sensitivities, x = ~ 1 - specificities,
+            type = "scatter", mode = "lines", name = "Shape metrics",
+            line = list(width = 3),
+            text = ~paste("LDA score:", round(thresholds, 3),
+                          "<br>True positive:", round(sensitivities, 2),
+                          "<br>False positive:", round(1-specificities, 2)), 
+            hoverinfo = "text")%>%
+  layout(xaxis = list(title = "False Positive Rate"),
+         yaxis = list(title = "True Positive Rate"),
+         legend = list(x = 0.75, y = 0.1),
+         hovermode = "closest")
+  ),
+  fluidRow(
+    column(12,
+           p(class = 'caption',
+             tags$b("Figure 6. Example receiver operating characterstic (ROC) curves used to identify thresholds for change detection.")," ROC curves plot linear discriminant analysis scores for a) change metrics and b) shape metrics used to identify new oil and gas well pads.  The values at which the rate of increase in detection rate relative to false positive rate decreases most rapidly are selected as threshold values."
+           )
+    )
+  )
+)
+```
+
+
+We then needed to discriminate between natural land cover changes that matched well pad spectral characteristics, and true human disturbances.  We calculated a suite of shape metrics for each land cover change polygon, including convexivity, circularity, elongation and compactness, that had the potential to distinguish more regular, compact shapes formed by human activity from irregular shapes associated with natural land-cover change[^13].   We then manually classified a validation set of 400 polygons and, as with reflectance thresholds, used LDA and ROC curves to identify values discriminating between true and false positives (Figure 6b).  We then examined the most recent Sentinel-2 imagery at each polygon that met spectral and shape criteria to confirm the presence of a well pad constructed after September 1, 2015, and deleting all other polygons.  For each choice of threshold, the true positive detection rate was less than one, and therefore this approach eliminated a small set of true human disturbances.  Thus, our results represent a minimum number of new pads.
+
+### Agricultural Conversion
+
+We use two approaches to identify habitat converted to agricultural land between two growing seasons, which we define as May 1 to September 1.
+
+Our first approach follows similar methodology to a previous study of habitat loss due to agricultural conversion [^15],  using the USDA’s annual Cropland Data Layer (CDL).  This product classifies agricultural land by crop type across the United States, using a combination of satellite reflectance, elevation and ground-truthing data[^16].   The product is a 30-meter resolution raster with pixels that have a cropland value designating crop type and an assignment confidence score [0, 1].  To estimate habitat conversion to agriculture, we select pixels classified as either scrubland or grassland in the 2015 CDL, and as any crop type in the 2016 CDL.  We perform this calculation using two different confidence thresholds: excluding pixels with less than 75 percent assignment confidence, and excluding pixels with less than 90 percent confidence.  We then apply two successive majority filters to each result to eliminate single, isolated pixels in order to create more contiguous areas of change or non change.  Areas representing change are then converted to polygons.  Finally, because of the concave and patchy nature of the per-pixel output, we created minimum-area bounding boxes around each polygon, which more accurately represent the footprint of an agricultural parcel.  
+
+Our second approach s designed to detect conversion to agriculture in a more generalized framework using measures of intra-annual variation in greenness, as indicated by NDVI.  We calculate NDVI across LPC range using orthorectified top-of-atmosphere reflectance Landsat-8 30-meter resolution images obtained between April 30 and September 1 in 2015 (before) and 2016 (after), available on Google Earth Engine.  We defined scenes collected in the growing season of 2015 as before conditions, and those collected in 2016 as after conditions.  We removed cloudy pixels from each image using the Fmask[^17] algorithm, which calculates the probability that a pixel is a cloud, shadow, or snow.  We excluded pixels with a probability exceeding 0.2.  For each year, we calculated the dispersion (sample variance normalized by sample mean) and maximum NDVI value across images at each pixel.  Our expectation was that agricultural land cover would have both greater variance and maximum NDVI values over the course of a growing season than natural landcover. Thus, conversion from LPC habitat to agriculture would be indicated by an increase in both values from 2015 to 2016.  To estimate the likelihood of conversion, we calculated the difference between NDVI dispersion and maxima between the two years.  
+
+Small sample size can bias estimates of dispersion, so we adjusted observed NDVI metrics by a measure of uncertainty based on the number of images available at a pixel location.  The probability of true population variance (*σ<sup>2</sup>*) given a sample variance (*s<sup>2</sup>*) and sample size (*n*) can be estimated by an Inverse Gamma distribution: <em>P(σ<sup>2</sup> | s<sup>2</sup>, n) ~ IG(n/2, (n-1)*s<sup>2</sup>/2)</em>.  We used the ratio of the probability density for the observed sample variance from a distribution parameterized by the actual sample size, to one parameterized by the maximum possible sample size, as an adjustment factor for observed dispersion.  The adjustment factor (AF) for observed dispersion at a given pixel _i_ was:
+
+<figure class="figure">
+  <img src="images/equation.png" class="figure-img img-fluid rounded" alt="Change Legend", margin="auto">
+</figure>
+
+We adjusted all NDVI dispersion values by the adjustment factors per pixel, using the maximum number of images available within the growing season (16) as _n<sub>max</sub>_.
+
+To identify thresholds representing true conversion of LPC habitat to agriculture, we generated distributions for expected differences in NDVI dispersion and max between habitat and agricultural land cover types.  We took a random sample of adjusted NDVI dispersion, maximum and image count values at 50,000 pixels where image count was at least 12.  We used the CDL to further restrict this sampling to pixels with an assignment confidence of at least 90 percent, and extracted the cropland attribute.  This created a dataset of NDVI dispersion and max values for each crop and landcover type.  From this data, we generated probability distributions for the expected change in NDVI dispersion and maxima corresponding to conversion between all combinations of shrub/grassland, alfalfa, corn, wheat, sorghum and fallow land-cover types by iteratively calculating the difference between 5,000 random samples drawn from the observed distributions for each crop and habitat category (Figure 8a & 8b).  We calculated the densities across values, and standardized to sum to 1.
+
+```{r f8, echo=FALSE, warning=FALSE, error=FALSE}
+fluidPage(
+  fluidRow(
+    subplot(subplot(p5, p3, nrows = 2, shareX = TRUE),
+            subplot(p6, p4, nrows = 2, shareX = TRUE))%>%
+      layout(legend = list(x = 0.55, y = 1))
+  ),
+  fluidRow(
+    column(12,
+           p(class = 'caption',
+             tags$b("Figure 8. Probability distributions for expected changes in NDVI dispersion and maxima if land is converted from Lesser prairie chicken habitat to different crop types."), " Curves represent the frequency of expected values (a, b) and probability of observing a change value (c, d) for each form of conversion.  Curves were used to select threshold change values, indicated by grey arrows, identifying when conversion occurred between growing seasons of 2015 and 2016, with 75 and 90 percent confidence."
+           )
+    )
+  )
+)
+```
+
+For an observed change in NDVI dispersion and maxima, we estimated the probability of conversion using the inverse of the cumulative distributions of expected differences given conversion from habitat to each crop type (Figure 8c and 8d), and the probability of no change using the cumulative distribution of expected differences for unchanged habitat.  To detect conversion to fallow land, we used the cumulative distribution of expected differences for change from habitat to fallow and the inverse cumulative distribution for unchanged habitat.  These curves were used to select confidence thresholds for identifying areas of conversion.  We defined the confidence that a pixel converted from habitat to agriculture as the product of the probability of conversion and the inverse of the probability of no change for an observed change in NDVI dispersion and maxima.
+
+<p style='font-size:small'>[^1]: [USGS Landsat 8 Program](https://landsat.usgs.gov/landsat-8)
+<p style='font-size:small'>[^2]: [European Space Agency Sentinel-2 Program](https://sentinel.esa.int/web/sentinel/missions/sentinel-2)
+<p style='font-size:small'><^3]: [United States Department of Agriculture NAIP Imagery Program](https://www.fsa.usda.gov/programs-and-services/aerial-photography/imagery-programs/naip-imagery/)
+<p style='font-size:small'>[^11]: Jin S, et al (2013). [A comprehensive change detection method for updating the National Land Cover Database to circa 2011.](http://digitalcommons.unl.edu/cgi/viewcontent.cgi?article=1720&context=usgsstaffpub) _Remote Sensing of Environment, 132_: p159-175.</p>
+<p style='font-size:small'>[^12]: Deng Y, et al (2015). [RNDSI: A ratio normalized difference soil index for remote sensing of urban/suburban environments.](https://pdfs.semanticscholar.org/79ce/60aa125ff72913d11a16db19629f7418b46d.pdf) _International Journal of Applied Earth Observation and Geoinformation, 39_: p40-48.</p>
+<p style='font-size:small'>[^13]: Jiao L, & Liu Y (2012). [Analyzing the shape characteristics of land use classes in remote sensing imagery.](https://pdfs.semanticscholar.org/986c/4dfcfc02f21dd7b2005488268c8026f3a48f.pdf) _ISPRS Annals of the Photogrammetry, Remote Sensing and Spatial Information Sciences, (I-7)_: p135-140.</p>
+<p style='font-size:small'>[^14]: Van Pelt WE, et al (2013). [The Lesser prairie-chicken range-wide conservation plan.](http://www.wafwa.org/Documents%20and%20Settings/37/Site%20Documents/Initiatives/Conservation%20Plan%20for%20LPC/2013LPCCompleteRWPsmall.pdf) _Western Association of Fish and Wildlife Agencies_, Cheyenne, WY.</p>
+<p style='font-size:small'>[^15]: Faber S, et al (2012). [Plowed Under.](http://www.wafwa.org/Documents%20and%20Settings/37/Site%20Documents/Initiatives/Conservation%20Plan%20for%20LPC/2013LPCCompleteRWPsmall.pdf) _Environmental Working Group_.</p>

@@ -109,6 +109,7 @@ a {
   font-style: italic;
   padding-bottom: 20px;
   padding-top: 10px;
+  padding-right: 5px;
 }
 
 .figure-caption {
@@ -121,10 +122,22 @@ a {
 
 .datatables.html-widget.html-widget-static-bound {
   width: 100% !important;
-  height: auto;
+  height: auto !important;
+  padding-bottom: 20px;
 }
 
 table {
   width: 100% !important;
   height: auto;
+}
+
+.footnotes {
+  font-size: 12px;
+}
+
+.abstract{
+  background-color: rgba(0, 104, 255, 0.1);
+  font-family: Helvetica, arial, sans-serif;
+  padding-right: 10px;
+  padding-left: 10px;
 }
